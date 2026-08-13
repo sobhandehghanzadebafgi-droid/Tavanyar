@@ -259,6 +259,53 @@ const genAccessCode = (existing) => {
   return c;
 };
 
+/* -------- امنیت پنل مدیریت (رمزنگاری یک‌طرفهٔ SHA-256 در مرورگر) -------- */
+async function sha256Hex(text) {
+  const buf = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function validatePassword(pw) {
+  if (!pw || pw.length < 8) return "رمز باید حداقل ۸ کاراکتر باشد.";
+  if (!/[A-Za-z]/.test(pw)) return "رمز باید حداقل یک حرف داشته باشد.";
+  if (!/[0-9]/.test(pw)) return "رمز باید حداقل یک عدد داشته باشد.";
+  if (!/[^A-Za-z0-9]/.test(pw)) return "رمز باید حداقل یک نماد (مثل !@#$%) داشته باشد.";
+  return "";
+}
+
+/* -------- فشرده‌سازی تصویر حرکات ورزشی پیش از ذخیره -------- */
+function compressImageFile(file, maxW = 860, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("خطا در خواندن فایل"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("فایل تصویر معتبر نیست"));
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width);
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* -------- زنجیرهٔ روزهای پیاپیِ انجام تمرین (برای انگیزهٔ روانی بیمار) -------- */
+function computeStreak(patient) {
+  const days = new Set((patient.adherence || []).map((a) => a.date));
+  let streak = 0;
+  const d = new Date();
+  if (!days.has(d.toISOString().slice(0, 10))) d.setDate(d.getDate() - 1);
+  while (days.has(d.toISOString().slice(0, 10))) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+
 function computeAssessment(p) {
   const hasFlag = (p.redFlags || []).length > 0;
   if (hasFlag) {
@@ -528,6 +575,35 @@ function SemiGauge({ value, max = 10, invert = false, label }) {
   );
 }
 
+function ProgressRing({ value, total, size = 76 }) {
+  const pct = total > 0 ? value / total : 0;
+  const r = (size - 10) / 2;
+  const c = 2 * Math.PI * r;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="#ffffff33" strokeWidth="7" fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="#ffffff" strokeWidth="7" fill="none"
+          strokeDasharray={c} strokeDashoffset={c - pct * c} strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset .6s ease" }} />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontFamily: "IBM Plex Mono, monospace", fontWeight: 700, fontSize: 14, color: "#fff" }}>{toFa(value)}/{toFa(total)}</div>
+      </div>
+    </div>
+  );
+}
+
+function StreakBadge({ streak }) {
+  if (!streak) return null;
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#ffffff26", borderRadius: 999, padding: "5px 12px", fontSize: 12.5, fontWeight: 700, color: "#fff" }}>
+      <span style={{ display: "inline-block", animation: "flamePulse 1.6s ease-in-out infinite" }}>🔥</span>
+      {toFa(streak)} روز پیاپی
+    </div>
+  );
+}
+
 function PhaseBadge({ phase, size = "md" }) {
   const m = PHASE_META[phase];
   return (
@@ -574,19 +650,37 @@ function ExerciseDetails({ ex, phase }) {
   );
 }
 
-function LibraryCard({ ex }) {
+function LibraryCard({ ex, image, onImageChange }) {
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
+  const fileRef = useRef(null);
   const region = REGIONS.find((r) => r.id === ex.region);
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { setUploadErr("لطفاً یک فایل تصویری انتخاب کنید."); return; }
+    setUploading(true); setUploadErr("");
+    try {
+      const dataUrl = await compressImageFile(file);
+      await onImageChange(ex.id, dataUrl);
+    } catch (e) { setUploadErr("آپلود تصویر ناموفق بود."); }
+    setUploading(false);
+  };
+
   return (
     <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 14, padding: 12 }}>
       <button onClick={() => setOpen((o) => !o)} style={{ all: "unset", cursor: "pointer", display: "flex", width: "100%", alignItems: "center", gap: 12 }}>
-        <div style={{ background: "var(--paper)", borderRadius: 12 }}><ExerciseFigure ex={ex} size={52} /></div>
+        <div style={{ background: "var(--paper)", borderRadius: 12, overflow: "hidden", width: 52, height: 52, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {image ? <img src={image} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ExerciseFigure ex={ex} size={52} />}
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600, fontSize: 14.5 }}>{ex.name}</div>
           <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ fontSize: 11.5, color: "var(--teal-deep)", background: "#2C7A7B14", borderRadius: 999, padding: "1px 8px" }}>{region?.label}</span>
             <CategoryTag category={ex.category} />
             <PhaseBadge phase={ex.startPhase} size="sm" />
+            {image && <span style={{ fontSize: 10.5, color: "var(--sage)", display: "inline-flex", alignItems: "center", gap: 3 }}><Check size={11} /> دارای عکس</span>}
           </div>
         </div>
         {open ? <ChevronDown size={18} color="var(--muted)" /> : <ChevronRight size={18} color="var(--muted)" />}
@@ -608,6 +702,26 @@ function LibraryCard({ ex }) {
             ))}
           </div>
           <div style={{ fontSize: 11.5, color: "var(--muted)", fontStyle: "italic" }}>منبع: {ex.ref}</div>
+
+          <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px dashed var(--line)" }}>
+            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6, fontWeight: 600 }}>عکس آموزشی حرکت (نمایش داده می‌شود به بیمار)</div>
+            {image && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <img src={image} alt={ex.name} style={{ width: 64, height: 64, borderRadius: 10, objectFit: "cover", border: "1px solid var(--line)" }} />
+                <button onClick={() => onImageChange(ex.id, null)} style={{ all: "unset", cursor: "pointer", fontSize: 12, color: "var(--coral)", display: "flex", alignItems: "center", gap: 4 }}>
+                  <Trash2 size={13} /> حذف عکس
+                </button>
+              </div>
+            )}
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => handleFile(e.target.files && e.target.files[0])} />
+            <button onClick={() => fileRef.current && fileRef.current.click()} disabled={uploading} style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 9, border: "1px solid var(--teal)",
+              background: "#fff", color: "var(--teal-deep)", fontWeight: 600, fontSize: 12.5, cursor: uploading ? "wait" : "pointer",
+            }}>
+              <Plus size={13} /> {uploading ? "در حال آپلود…" : image ? "جایگزینی عکس" : "آپلود عکس"}
+            </button>
+            {uploadErr && <div style={{ color: "var(--coral)", fontSize: 11.5, marginTop: 6 }}>{uploadErr}</div>}
+          </div>
         </div>
       )}
     </div>
@@ -643,24 +757,65 @@ function ProgramRow({ ex, phase, included, onToggle }) {
   );
 }
 
-function PortalCard({ ex, phase, done, onLog }) {
+function ExerciseDetailModal({ ex, phase, image, onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#16232E85", zIndex: 65, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 440, maxHeight: "88vh", overflowY: "auto", boxShadow: "var(--shadow-lg)" }}>
+        <div style={{ position: "relative" }}>
+          {image ? (
+            <img src={image} alt={ex.name} style={{ width: "100%", maxHeight: 300, objectFit: "cover", display: "block", borderRadius: "18px 18px 0 0" }} />
+          ) : (
+            <div style={{ background: "var(--paper)", borderRadius: "18px 18px 0 0", padding: "28px 0", display: "flex", justifyContent: "center" }}>
+              <ExerciseFigure ex={ex} size={140} />
+            </div>
+          )}
+          <button onClick={onClose} style={{ all: "unset", cursor: "pointer", position: "absolute", top: 10, left: 10, background: "#16232Eaa", borderRadius: 999, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <X size={16} color="#fff" />
+          </button>
+        </div>
+        <div style={{ padding: 20 }}>
+          <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 700 }}>{ex.name}</div>
+          <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 8, lineHeight: 1.9 }}>{ex.cues}</div>
+          <div style={{ marginTop: 12, fontFamily: "IBM Plex Mono, monospace", fontSize: 13, color: "var(--teal-deep)", background: "var(--paper)", display: "inline-block", padding: "5px 12px", borderRadius: 9 }}>
+            {DOSAGE[ex.category][phase]}
+          </div>
+          {ex.caution && (
+            <div style={{ marginTop: 10, display: "flex", gap: 6, color: "var(--coral)", background: "#D9645A14", borderRadius: 8, padding: "8px 10px", fontSize: 12.5 }}>
+              <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} /> {ex.caution}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PortalCard({ ex, phase, done, onLog, image }) {
   const [logging, setLogging] = useState(false);
   const [before, setBefore] = useState(5);
   const [after, setAfter] = useState(3);
+  const [showDetail, setShowDetail] = useState(false);
   return (
     <div style={{ background: "var(--card)", border: `1px solid ${done ? "var(--sage)" : "var(--line)"}`, borderRadius: 16, padding: 16 }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-        <div style={{ background: "var(--paper)", borderRadius: 14 }}><ExerciseFigure ex={ex} size={60} /></div>
+      <button onClick={() => setShowDetail(true)} style={{ all: "unset", cursor: "pointer", display: "flex", width: "100%", alignItems: "flex-start", gap: 14 }}>
+        <div style={{ background: "var(--paper)", borderRadius: 14, width: 60, height: 60, flexShrink: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+          {image ? <img src={image} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ExerciseFigure ex={ex} size={60} />}
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 16 }}>{ex.name}</div>
-          <div style={{ fontSize: 13.5, color: "var(--muted)", marginTop: 4 }}>{ex.cues}</div>
+          <div style={{ fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 6 }}>
+            {ex.name}
+            <span style={{ fontSize: 11, color: "var(--teal-deep)", fontWeight: 500 }}>· مشاهدهٔ عکس و توضیح</span>
+          </div>
+          <div style={{ fontSize: 13.5, color: "var(--muted)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{ex.cues}</div>
           <div style={{ marginTop: 8, fontFamily: "IBM Plex Mono, monospace", fontSize: 13, color: "var(--teal-deep)", background: "var(--paper)", display: "inline-block", padding: "4px 10px", borderRadius: 8 }}>
             {DOSAGE[ex.category][phase]}
           </div>
           {ex.caution && <div style={{ marginTop: 6, fontSize: 12, color: "var(--coral)" }}>⚠ {ex.caution}</div>}
         </div>
         {done && !logging && <span style={{ color: "var(--sage)", display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, fontWeight: 600, flexShrink: 0 }}><Check size={16} /> امروز انجام شد</span>}
-      </div>
+      </button>
+
+      {showDetail && <ExerciseDetailModal ex={ex} phase={phase} image={image} onClose={() => setShowDetail(false)} />}
 
       {!logging && (
         <button onClick={() => setLogging(true)} style={{
@@ -710,7 +865,7 @@ function PatientFormModal({ initial, onSave, onClose }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#16232E77", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto", padding: 22 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto", padding: 22, boxShadow: "var(--shadow-lg)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600 }}>{initial ? "ویرایش بیمار" : "بیمار جدید"}</div>
           <button onClick={onClose} style={{ all: "unset", cursor: "pointer" }}><X size={20} color="var(--muted)" /></button>
@@ -785,7 +940,7 @@ function PatientFormModal({ initial, onSave, onClose }) {
 
 /* --------------------------------- کنسول پزشک --------------------------------- */
 
-function DoctorConsole({ patients, setPatients }) {
+function DoctorConsole({ patients, setPatients, exerciseImages, onImageChange, regionAdvice, onAdviceChange }) {
   const isMobile = useIsMobile();
   const [selectedId, setSelectedId] = useState(patients[0]?.id || null);
   const [tab, setTab] = useState("assess");
@@ -855,7 +1010,7 @@ function DoctorConsole({ patients, setPatients }) {
 
       <div style={{ flex: 1, minWidth: 0, width: isMobile ? "100%" : "auto" }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 16, borderBottom: "1px solid var(--line)", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          {[{ id: "assess", l: "ارزیابی و الگوریتم", icon: Activity }, { id: "program", l: "برنامهٔ ورزشی", icon: ClipboardList }, { id: "library", l: "کتابخانهٔ ورزش‌ها", icon: Dumbbell }].map((t) => (
+          {[{ id: "assess", l: "ارزیابی و الگوریتم", icon: Activity }, { id: "program", l: "برنامهٔ ورزشی", icon: ClipboardList }, { id: "library", l: "کتابخانهٔ ورزش‌ها", icon: Dumbbell }, { id: "advice", l: "توصیه‌های عمومی", icon: Info }].map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, padding: "10px 12px", fontSize: 13,
               fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? "var(--teal-deep)" : "var(--muted)",
@@ -873,12 +1028,18 @@ function DoctorConsole({ patients, setPatients }) {
               {REGIONS.map((r) => <button key={r.id} onClick={() => setLibRegion(r.id)} style={chip(libRegion === r.id)}>{r.label}</button>)}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill,minmax(280px,1fr))", gap: 10 }}>
-              {EXERCISES.filter((e) => libRegion === "all" || e.region === libRegion).map((e) => <LibraryCard key={e.id} ex={e} />)}
+              {EXERCISES.filter((e) => libRegion === "all" || e.region === libRegion).map((e) => (
+                <LibraryCard key={e.id} ex={e} image={exerciseImages[e.id]} onImageChange={onImageChange} />
+              ))}
             </div>
           </div>
         )}
 
-        {!patient && tab !== "library" && (
+        {tab === "advice" && (
+          <RegionAdviceTab regionAdvice={regionAdvice} onAdviceChange={onAdviceChange} />
+        )}
+
+        {!patient && tab !== "library" && tab !== "advice" && (
           <EmptyState icon={Users} title="بیماری انتخاب نشده" desc="از فهرست سمت راست یک بیمار را انتخاب کنید یا یک بیمار جدید اضافه کنید." action={{ label: "افزودن بیمار جدید", onClick: () => { setEditing(null); setShowForm(true); } }} />
         )}
 
@@ -1043,6 +1204,52 @@ function ProgramTab({ patient, onUpdate }) {
   );
 }
 
+function RegionAdviceTab({ regionAdvice, onAdviceChange }) {
+  const [activeRegion, setActiveRegion] = useState(REGIONS[0].id);
+  const [draft, setDraft] = useState(regionAdvice[activeRegion] || "");
+  const [savedTick, setSavedTick] = useState(false);
+
+  useEffect(() => { setDraft(regionAdvice[activeRegion] || ""); }, [activeRegion]);
+
+  const save = () => {
+    onAdviceChange(activeRegion, draft);
+    setSavedTick(true);
+    setTimeout(() => setSavedTick(false), 1300);
+  };
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 18 }}>
+        <div style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 600, marginBottom: 4 }}>توصیه‌های عمومی برای هر ناحیهٔ بدن</div>
+        <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 14, lineHeight: 1.8 }}>
+          برای هر ناحیه یک متن راهنمای عمومی بنویسید (مثلاً توصیه‌های وضعیت بدنی، فعالیت‌های روزمره یا هشدارها برای کمردرد). این متن به تمام بیمارانی که آن ناحیه را دارند نمایش داده می‌شود.
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+          {REGIONS.map((r) => (
+            <button key={r.id} onClick={() => setActiveRegion(r.id)} style={chip(activeRegion === r.id)}>
+              {r.label}
+              {regionAdvice[r.id] ? <span style={{ marginInlineStart: 5, opacity: 0.7 }}>●</span> : null}
+            </button>
+          ))}
+        </div>
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={8}
+          placeholder={`مثلاً برای کمردرد: از نشستن طولانی‌مدت بدون تغییر وضعیت پرهیز کنید، هر ۳۰ دقیقه بایستید و کمی راه بروید، هنگام بلند کردن اجسام زانو را خم کنید نه کمر را...`}
+          style={{ ...inputStyle, resize: "vertical", lineHeight: 1.9 }}
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+          <button onClick={save} style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: "var(--teal)", color: "#fff", fontWeight: 600, fontSize: 13.5, cursor: "pointer" }}>
+            ذخیرهٔ توصیه برای «{REGIONS.find((r) => r.id === activeRegion)?.label}»
+          </button>
+          {savedTick && <span style={{ fontSize: 12, color: "var(--sage)" }}>ذخیره شد ✓</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* --------------------------------- ورود و پورتال بیمار --------------------------------- */
 
 function PatientLockScreen({ patients, onUnlock }) {
@@ -1076,7 +1283,7 @@ function PatientLockScreen({ patients, onUnlock }) {
   );
 }
 
-function PatientPortal({ patient, setPatients, onLock }) {
+function PatientPortal({ patient, setPatients, onLock, exerciseImages, regionAdvice }) {
   const assessment = computeAssessment(patient);
   const included = (patient.program || []).filter((pi) => pi.included);
 
@@ -1095,19 +1302,38 @@ function PatientPortal({ patient, setPatients, onLock }) {
   const last7 = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().slice(0, 10); });
   const doneDays = new Set((patient.adherence || []).filter((a) => last7.includes(a.date)).map((a) => a.date)).size;
   const adherencePct = Math.round((doneDays / 7) * 100);
+  const streak = computeStreak(patient);
+  const doneToday = new Set((patient.adherence || []).filter((a) => a.date === todayStr()).map((a) => a.exerciseId));
+  const doneTodayCount = included.filter((pi) => doneToday.has(pi.exerciseId)).length;
+  const advices = (patient.regions || []).map((r) => ({ region: REGIONS.find((x) => x.id === r), text: regionAdvice[r] })).filter((a) => a.region && a.text);
 
   return (
-    <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px" }}>
+    <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px" }} className="fade-in">
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
         <button onClick={onLock} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--muted)" }}>
           <LogOut size={13} /> خروج
         </button>
       </div>
 
-      <div style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-deep))", borderRadius: 18, padding: 20, color: "#fff", marginBottom: 16 }}>
-        <div style={{ fontSize: 13, opacity: 0.85 }}>{faDate()}</div>
-        <div style={{ fontFamily: "Fraunces, serif", fontSize: 24, fontWeight: 600, marginTop: 4 }}>سلام {patient.name} 👋</div>
-        <div style={{ fontSize: 13, opacity: 0.9, marginTop: 6 }}>برنامهٔ امروز شما {toFa(included.length)} حرکت دارد — {toFa(adherencePct)}٪ پایبندی در ۷ روز اخیر</div>
+      <div style={{
+        background: "linear-gradient(135deg, var(--teal), var(--teal-deep) 65%, var(--plum-deep))",
+        borderRadius: 20, padding: 22, color: "#fff", marginBottom: 16, position: "relative", overflow: "hidden",
+      }}>
+        <div style={{ position: "absolute", inset: 0, opacity: 0.5, background: "radial-gradient(circle at 88% -10%, #ffffff30, transparent 45%), radial-gradient(circle at 0% 120%, #ffffff22, transparent 40%)" }} />
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <div style={{ fontSize: 13, opacity: 0.85 }}>{faDate()}</div>
+            <div style={{ fontFamily: "Fraunces, serif", fontSize: 25, fontWeight: 700, marginTop: 4 }}>سلام {patient.name} 👋</div>
+            <div style={{ fontSize: 13, opacity: 0.92, marginTop: 6 }}>امروز {toFa(doneTodayCount)} از {toFa(included.length)} حرکت را انجام داده‌اید</div>
+            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+              <StreakBadge streak={streak} />
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#ffffff26", borderRadius: 999, padding: "5px 12px", fontSize: 12.5, fontWeight: 700 }}>
+                {toFa(adherencePct)}٪ پایبندی ۷ روز اخیر
+              </span>
+            </div>
+          </div>
+          {included.length > 0 && <ProgressRing value={doneTodayCount} total={included.length} />}
+        </div>
       </div>
 
       {included.length === 0 && <EmptyState icon={ClipboardList} title="برنامه‌ای تنظیم نشده" desc="از پزشک خود بخواهید برنامهٔ ورزشی شما را تنظیم کند." />}
@@ -1116,7 +1342,7 @@ function PatientPortal({ patient, setPatients, onLock }) {
         {included.map((pi) => {
           const ex = EXERCISES.find((e) => e.id === pi.exerciseId);
           const done = (patient.adherence || []).some((a) => a.date === todayStr() && a.exerciseId === ex.id);
-          return <PortalCard key={ex.id} ex={ex} phase={assessment.phase} done={done} onLog={(b, a) => logExercise(ex.id, b, a)} />;
+          return <PortalCard key={ex.id} ex={ex} phase={assessment.phase} done={done} onLog={(b, a) => logExercise(ex.id, b, a)} image={exerciseImages[ex.id]} />;
         })}
       </div>
 
@@ -1130,6 +1356,114 @@ function PatientPortal({ patient, setPatients, onLock }) {
           />
         </div>
       )}
+
+      {advices.length > 0 && (
+        <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: 6 }}>
+            <Info size={15} color="var(--teal-deep)" /> توصیه‌های عمومی برای شما
+          </div>
+          {advices.map((a) => (
+            <div key={a.region.id} style={{ background: "var(--teal-light)", border: "1px solid #2C7A7B33", borderRadius: 16, padding: 16 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--teal-deep)", marginBottom: 6 }}>{a.region.label}</div>
+              <div style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 2, whiteSpace: "pre-wrap" }}>{a.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* --------------------------------- امنیت پنل مدیریت --------------------------------- */
+
+function AdminGate({ hasHash, onSubmit, onClose, error }) {
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [localErr, setLocalErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!hasHash) {
+      const check = validatePassword(pw);
+      if (check) { setLocalErr(check); return; }
+      if (pw !== pw2) { setLocalErr("رمزها با هم یکسان نیستند."); return; }
+    } else if (!pw) {
+      setLocalErr("رمز عبور را وارد کنید.");
+      return;
+    }
+    setLocalErr(""); setBusy(true);
+    await onSubmit(pw);
+    setBusy(false);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#16232E85", zIndex: 70, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 380, padding: 26, textAlign: "center", boxShadow: "var(--shadow-lg)" }}>
+        <div style={{ width: 50, height: 50, borderRadius: 14, background: "#7B5C931a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+          <KeyRound size={20} color="var(--plum)" />
+        </div>
+        <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 700 }}>{hasHash ? "ورود به پنل مدیریت" : "تعیین رمز پنل مدیریت"}</div>
+        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 6, lineHeight: 1.8 }}>
+          {hasHash ? "پنل مدیریت جدا از بخش بیمار و با رمز عبور محافظت می‌شود." : "رمزی بسازید که شامل حرف، عدد و یک نماد باشد تا پنل مدیریت شما محافظت‌شده بماند."}
+        </div>
+        <input
+          type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="رمز عبور"
+          onKeyDown={(e) => e.key === "Enter" && (hasHash ? submit() : null)}
+          style={{ ...inputStyle, marginTop: 16, textAlign: "center", letterSpacing: 2 }}
+        />
+        {!hasHash && (
+          <input
+            type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder="تکرار رمز عبور"
+            onKeyDown={(e) => e.key === "Enter" && submit()}
+            style={{ ...inputStyle, textAlign: "center", letterSpacing: 2 }}
+          />
+        )}
+        {!hasHash && <div style={{ fontSize: 10.5, color: "var(--muted)", marginTop: 6, lineHeight: 1.7 }}>حداقل ۸ کاراکتر، شامل حرف، عدد و یک نماد (مثل !@#$%)</div>}
+        {(localErr || error) && <div style={{ color: "var(--coral)", fontSize: 12, marginTop: 8 }}>{localErr || error}</div>}
+        <button onClick={submit} disabled={busy} style={{ marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: "none", background: "var(--plum)", color: "#fff", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+          {busy ? "در حال بررسی…" : hasHash ? "ورود" : "ساخت رمز و ورود"}
+        </button>
+        <button onClick={onClose} style={{ all: "unset", cursor: "pointer", marginTop: 12, fontSize: 11.5, color: "var(--muted)", display: "block", marginInline: "auto" }}>انصراف</button>
+        <div style={{ marginTop: 14, fontSize: 10, color: "var(--muted)", lineHeight: 1.7 }}>
+          رمز به‌صورت درهم‌سازی‌شده (SHA-256) روی همین دستگاه/فضای ذخیره‌سازی مشترک نگه‌داری می‌شود؛ برای دادهٔ بالینی واقعاً حساس از یک سامانهٔ احراز هویت اختصاصی استفاده کنید.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChangePasswordModal({ onSubmit, onClose }) {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [next2, setNext2] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    const check = validatePassword(next);
+    if (check) { setErr(check); return; }
+    if (next !== next2) { setErr("رمزهای جدید یکسان نیستند."); return; }
+    setErr(""); setBusy(true);
+    const ok = await onSubmit(current, next);
+    setBusy(false);
+    if (!ok) setErr("رمز فعلی اشتباه است.");
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#16232E85", zIndex: 70, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 380, padding: 26, boxShadow: "var(--shadow-lg)" }}>
+        <div style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 700, marginBottom: 14 }}>تغییر رمز پنل مدیریت</div>
+        <div style={{ display: "grid", gap: 10 }}>
+          <input type="password" placeholder="رمز فعلی" value={current} onChange={(e) => setCurrent(e.target.value)} style={inputStyle} />
+          <input type="password" placeholder="رمز جدید (حرف + عدد + نماد)" value={next} onChange={(e) => setNext(e.target.value)} style={inputStyle} />
+          <input type="password" placeholder="تکرار رمز جدید" value={next2} onChange={(e) => setNext2(e.target.value)} style={inputStyle} />
+        </div>
+        {err && <div style={{ color: "var(--coral)", fontSize: 12, marginTop: 8 }}>{err}</div>}
+        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          <button onClick={submit} disabled={busy} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", background: "var(--plum)", color: "#fff", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>{busy ? "در حال ذخیره…" : "ذخیره"}</button>
+          <button onClick={onClose} style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid var(--line)", background: "#fff", cursor: "pointer", color: "var(--muted)" }}>انصراف</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1138,12 +1472,20 @@ function PatientPortal({ patient, setPatients, onLock }) {
 
 function App() {
   const [patients, setPatients] = useState([]);
-  const [mode, setMode] = useState("doctor");
   const [loading, setLoading] = useState(true);
   const [savedTick, setSavedTick] = useState(false);
   const [unlockedId, setUnlockedId] = useState(null);
   const mounted = useRef(false);
   const [resetConfirm, setResetConfirm] = useState(false);
+
+  const [exerciseImages, setExerciseImages] = useState({});
+  const [regionAdvice, setRegionAdvice] = useState({});
+
+  const [adminHash, setAdminHash] = useState(""); // "" = رمز هنوز تعیین نشده
+  const [adminMode, setAdminMode] = useState(false);
+  const [showAdminGate, setShowAdminGate] = useState(false);
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [adminError, setAdminError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -1151,6 +1493,18 @@ function App() {
         const res = await window.storage.get("tavanyar-patients-shared-v1", true);
         setPatients(res ? JSON.parse(res.value) : []);
       } catch (e) { setPatients([]); }
+      try {
+        const res2 = await window.storage.get("tavanyar-exercise-images-v1", true);
+        setExerciseImages(res2 ? JSON.parse(res2.value) : {});
+      } catch (e) { setExerciseImages({}); }
+      try {
+        const res3 = await window.storage.get("tavanyar-region-advice-v1", true);
+        setRegionAdvice(res3 ? JSON.parse(res3.value) : {});
+      } catch (e) { setRegionAdvice({}); }
+      try {
+        const res4 = await window.storage.get("tavanyar-admin-auth-v1", true);
+        setAdminHash(res4 ? res4.value : "");
+      } catch (e) { setAdminHash(""); }
       setLoading(false);
       mounted.current = true;
     })();
@@ -1168,6 +1522,22 @@ function App() {
     return () => clearTimeout(t);
   }, [patients]);
 
+  useEffect(() => {
+    if (!mounted.current) return;
+    const t = setTimeout(async () => {
+      try { await window.storage.set("tavanyar-exercise-images-v1", JSON.stringify(exerciseImages), true); } catch (e) {}
+    }, 400);
+    return () => clearTimeout(t);
+  }, [exerciseImages]);
+
+  useEffect(() => {
+    if (!mounted.current) return;
+    const t = setTimeout(async () => {
+      try { await window.storage.set("tavanyar-region-advice-v1", JSON.stringify(regionAdvice), true); } catch (e) {}
+    }, 400);
+    return () => clearTimeout(t);
+  }, [regionAdvice]);
+
   const resetAll = async () => {
     setPatients([]);
     try { await window.storage.set("tavanyar-patients-shared-v1", JSON.stringify([]), true); } catch (e) {}
@@ -1176,73 +1546,178 @@ function App() {
 
   const unlockedPatient = patients.find((p) => p.id === unlockedId);
 
+  const handleImageChange = (exId, dataUrlOrNull) => {
+    setExerciseImages((prev) => {
+      const next = { ...prev };
+      if (dataUrlOrNull) next[exId] = dataUrlOrNull; else delete next[exId];
+      return next;
+    });
+  };
+
+  const handleAdviceChange = (regionId, text) => {
+    setRegionAdvice((prev) => ({ ...prev, [regionId]: text }));
+  };
+
+  const onAdminButtonClick = () => {
+    if (adminMode) { setAdminMode(false); return; }
+    setAdminError("");
+    setShowAdminGate(true);
+  };
+
+  const submitAdminGate = async (pw) => {
+    try {
+      if (!adminHash) {
+        const hash = await sha256Hex(pw);
+        await window.storage.set("tavanyar-admin-auth-v1", hash, true);
+        setAdminHash(hash);
+        setAdminMode(true);
+        setShowAdminGate(false);
+        return;
+      }
+      const hash = await sha256Hex(pw);
+      if (hash === adminHash) {
+        setAdminMode(true);
+        setShowAdminGate(false);
+        setAdminError("");
+      } else {
+        setAdminError("رمز اشتباه است.");
+      }
+    } catch (e) {
+      setAdminError("خطایی رخ داد، دوباره تلاش کنید.");
+    }
+  };
+
+  const submitChangePassword = async (currentPw, nextPw) => {
+    const currentHash = await sha256Hex(currentPw);
+    if (currentHash !== adminHash) return false;
+    const newHash = await sha256Hex(nextPw);
+    setAdminHash(newHash);
+    try { await window.storage.set("tavanyar-admin-auth-v1", newHash, true); } catch (e) {}
+    setShowChangePw(false);
+    return true;
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--paper)", direction: "rtl", fontFamily: "Inter, sans-serif", color: "var(--ink)", paddingBottom: 60 }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
         :root{
-          --ink:#16232E; --teal:#2C7A7B; --teal-deep:#1F5B5C; --paper:#F1F4F1; --card:#FFFFFF;
-          --coral:#D9645A; --sage:#6E9C7D; --amber:#C98A3B; --line:#DCE3DE; --muted:#5B6B66;
+          --ink:#16232E; --teal:#2C7A7B; --teal-deep:#1F5B5C; --teal-light:#E3F1EF;
+          --paper:#EEF3EF; --card:#FFFFFF;
+          --coral:#D9645A; --sage:#6E9C7D; --amber:#C98A3B; --gold:#DFA53C; --plum:#7B5C93; --plum-deep:#5B4270;
+          --line:#DCE3DE; --muted:#5B6B66;
+          --shadow-sm: 0 1px 2px rgba(22,35,46,.05), 0 2px 8px rgba(22,35,46,.05);
+          --shadow-md: 0 8px 22px rgba(22,35,46,.10), 0 2px 6px rgba(22,35,46,.05);
+          --shadow-lg: 0 20px 50px rgba(22,35,46,.16);
         }
         * { box-sizing: border-box; }
         body { margin: 0; }
-        input[type=range]{ height:4px; border-radius:999px; }
+        input[type=range]{ height:4px; border-radius:999px; accent-color: var(--teal); }
         ::selection{ background: var(--teal); color:#fff; }
+        button{ transition: transform .15s ease, box-shadow .2s ease, opacity .15s ease, background .2s ease, border-color .2s ease; }
+        button:active{ transform: scale(0.97); }
+        /* کارت‌ها به‌صورت خودکار سایه و افکت هاور می‌گیرند */
+        div[style*="var(--card)"][style*="var(--line)"]{
+          box-shadow: var(--shadow-sm);
+          transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
+        }
+        div[style*="var(--card)"][style*="var(--line)"]:hover{
+          box-shadow: var(--shadow-md);
+        }
+        @keyframes fadeInUp{ from{ opacity:0; transform: translateY(8px);} to{ opacity:1; transform: translateY(0);} }
+        @keyframes floatSlow{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
+        @keyframes flamePulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.12);} }
+        .fade-in{ animation: fadeInUp .5s cubic-bezier(.2,.7,.3,1) both; }
         @media (prefers-reduced-motion: reduce){ *{ animation-duration: .01ms !important; } }
       `}</style>
 
-      <header style={{ position: "sticky", top: 0, zIndex: 20, background: "#F1F4F1EE", backdropFilter: "blur(6px)", borderBottom: "1px solid var(--line)", padding: "12px 16px" }}>
-        <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 11, background: "var(--teal)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Stethoscope size={19} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, lineHeight: 1.1 }}>توان‌یار</div>
-              <div style={{ fontSize: 10.5, color: "var(--muted)" }}>دستیار هوشمند تجویز ورزش توانبخشی</div>
-            </div>
-          </div>
+      {/* دکمهٔ شناور ورود به پنل مدیریت — کاملاً جدا از تجربهٔ بیمار، در گوشهٔ بالا-چپ صفحه */}
+      <button
+        onClick={onAdminButtonClick}
+        title="پنل مدیریت"
+        style={{
+          all: "unset", cursor: "pointer", position: "fixed", top: 16, left: 16, zIndex: 60,
+          width: 42, height: 42, borderRadius: 13, display: "flex", alignItems: "center", justifyContent: "center",
+          background: adminMode ? "var(--plum)" : "var(--card)", border: `1px solid ${adminMode ? "var(--plum)" : "var(--line)"}`,
+          boxShadow: "var(--shadow-md)",
+        }}
+      >
+        <Stethoscope size={18} color={adminMode ? "#fff" : "var(--plum)"} />
+      </button>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {savedTick && <span style={{ fontSize: 11, color: "var(--sage)" }}>ذخیره شد ✓</span>}
-            <div style={{ display: "flex", background: "var(--card)", borderRadius: 999, padding: 3, border: "1px solid var(--line)" }}>
-              {[{ id: "doctor", l: "پزشک", icon: Stethoscope }, { id: "patient", l: "بیمار", icon: User }].map((m) => (
-                <button key={m.id} onClick={() => setMode(m.id)} style={{
-                  all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 999,
-                  fontSize: 12.5, fontWeight: 600, background: mode === m.id ? "var(--teal)" : "transparent", color: mode === m.id ? "#fff" : "var(--muted)",
-                }}>
-                  <m.icon size={13} /> {m.l}
-                </button>
-              ))}
+      {adminMode ? (
+        <header style={{ position: "sticky", top: 0, zIndex: 20, background: "linear-gradient(135deg, var(--plum), var(--plum-deep))", padding: "12px 16px", boxShadow: "var(--shadow-md)" }}>
+          <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 11, background: "#ffffff22", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Stethoscope size={18} color="#fff" />
+              </div>
+              <div>
+                <div style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, lineHeight: 1.1, color: "#fff" }}>پنل مدیریت توان‌یار</div>
+                <div style={{ fontSize: 10.5, color: "#ffffffb0" }}>جدا از تجربهٔ بیمار — فقط برای پزشک/درمانگر</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              {savedTick && <span style={{ fontSize: 11, color: "#fff" }}>ذخیره شد ✓</span>}
+              <button onClick={() => setShowChangePw(true)} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#fff", background: "#ffffff22", borderRadius: 999, padding: "7px 12px" }}>
+                <KeyRound size={13} /> تغییر رمز
+              </button>
+              <button onClick={() => setAdminMode(false)} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--plum-deep)", background: "#fff", borderRadius: 999, padding: "7px 12px", fontWeight: 700 }}>
+                <LogOut size={13} /> خروج از پنل مدیریت
+              </button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      ) : (
+        <header style={{ position: "sticky", top: 0, zIndex: 20, background: "#EEF3EFEE", backdropFilter: "blur(6px)", borderBottom: "1px solid var(--line)", padding: "12px 16px" }}>
+          <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 11, background: "linear-gradient(135deg, var(--teal), var(--teal-deep))", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" }}>
+                <Sparkles size={18} color="#fff" />
+              </div>
+              <div>
+                <div style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, lineHeight: 1.1 }}>توان‌یار</div>
+                <div style={{ fontSize: 10.5, color: "var(--muted)" }}>دستیار هوشمند تجویز ورزش توانبخشی</div>
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
 
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "10px 16px 0" }}>
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 11.5, color: "var(--muted)" }}>
           <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-          این ابزار صرفاً کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نمی‌شود. دادهٔ بیماران برای دسترسیِ بیمار از دستگاه خودش به‌صورت مشترک ذخیره می‌شود و فقط با یک کد ۴ رقمی محافظت سطحی دارد؛ این معادل احراز هویت واقعی نیست — برای اطلاعات بالینی حساس واقعی از یک سامانهٔ اختصاصی با ورود امن استفاده کنید.
+          {adminMode
+            ? "این ابزار صرفاً کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نمی‌شود. پنل مدیریت با رمز عبور محافظت می‌شود؛ دادهٔ بیماران به‌صورت مشترک در فضای ذخیره‌سازی این صفحه نگه‌داری می‌شود."
+            : "این ابزار صرفاً کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نمی‌شود. برنامهٔ ورزشی شما را پزشک از پنل مدیریت تنظیم می‌کند و با یک کد ۴ رقمی قابل مشاهده است؛ این کد یک قفل سادهٔ نمایشی است، نه احراز هویت واقعی."}
         </div>
       </div>
 
-      <div style={{ marginTop: 18 }}>
+      <div style={{ marginTop: 18, maxWidth: adminMode ? undefined : 1180, marginInline: adminMode ? undefined : "auto" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 13 }}>در حال بارگذاری…</div>
-        ) : mode === "doctor" ? (
-          <DoctorConsole patients={patients} setPatients={setPatients} />
+        ) : adminMode ? (
+          <div style={{ maxWidth: 1180, margin: "0 auto", padding: "0 16px" }} className="fade-in">
+            <DoctorConsole
+              patients={patients} setPatients={setPatients}
+              exerciseImages={exerciseImages} onImageChange={handleImageChange}
+              regionAdvice={regionAdvice} onAdviceChange={handleAdviceChange}
+            />
+            <div style={{ textAlign: "center", marginTop: 40 }}>
+              <button onClick={() => (resetConfirm ? resetAll() : setResetConfirm(true))} style={{ all: "unset", cursor: "pointer", fontSize: 11, color: "var(--muted)" }}>
+                {resetConfirm ? "برای پاک‌شدن همهٔ دادهٔ بیماران دوباره کلیک کنید" : "پاک کردن همهٔ دادهٔ بیماران"}
+              </button>
+            </div>
+          </div>
         ) : unlockedPatient ? (
-          <PatientPortal patient={unlockedPatient} setPatients={setPatients} onLock={() => setUnlockedId(null)} />
+          <PatientPortal patient={unlockedPatient} setPatients={setPatients} onLock={() => setUnlockedId(null)} exerciseImages={exerciseImages} regionAdvice={regionAdvice} />
         ) : (
           <PatientLockScreen patients={patients} onUnlock={setUnlockedId} />
         )}
       </div>
 
-      <div style={{ textAlign: "center", marginTop: 40 }}>
-        <button onClick={() => (resetConfirm ? resetAll() : setResetConfirm(true))} style={{ all: "unset", cursor: "pointer", fontSize: 11, color: "var(--muted)" }}>
-          {resetConfirm ? "برای پاک‌شدن همهٔ داده‌ها دوباره کلیک کنید" : "پاک کردن همهٔ داده‌ها"}
-        </button>
-      </div>
+      {showAdminGate && <AdminGate hasHash={!!adminHash} onSubmit={submitAdminGate} onClose={() => setShowAdminGate(false)} error={adminError} />}
+      {showChangePw && <ChangePasswordModal onSubmit={submitChangePassword} onClose={() => setShowChangePw(false)} />}
     </div>
   );
 }
