@@ -260,6 +260,9 @@ const genAccessCode = (existing) => {
 };
 
 /* -------- امنیت پنل مدیریت (رمزنگاری یک‌طرفهٔ SHA-256 در مرورگر) -------- */
+// رمز پیش‌فرض و ثابت پنل مدیریت: فقط دارندهٔ این رمز می‌تواند وارد شود.
+// هش SHA-256 رمز «M@hammad74» — از سمت کاربر قابل تغییر است ولی هرگز به‌صورت متن ساده ذخیره نمی‌شود.
+const DEFAULT_ADMIN_HASH = "a13e4d2e7902b7da3b10dacb744dd8a105c385e124062ee704c155b15b25f1b6";
 async function sha256Hex(text) {
   const buf = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -1376,21 +1379,13 @@ function PatientPortal({ patient, setPatients, onLock, exerciseImages, regionAdv
 
 /* --------------------------------- امنیت پنل مدیریت --------------------------------- */
 
-function AdminGate({ hasHash, onSubmit, onClose, error }) {
+function AdminGate({ onSubmit, onClose, error }) {
   const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
   const [localErr, setLocalErr] = useState("");
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (!hasHash) {
-      const check = validatePassword(pw);
-      if (check) { setLocalErr(check); return; }
-      if (pw !== pw2) { setLocalErr("رمزها با هم یکسان نیستند."); return; }
-    } else if (!pw) {
-      setLocalErr("رمز عبور را وارد کنید.");
-      return;
-    }
+    if (!pw) { setLocalErr("رمز عبور را وارد کنید."); return; }
     setLocalErr(""); setBusy(true);
     await onSubmit(pw);
     setBusy(false);
@@ -1402,30 +1397,23 @@ function AdminGate({ hasHash, onSubmit, onClose, error }) {
         <div style={{ width: 50, height: 50, borderRadius: 14, background: "#7B5C931a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
           <KeyRound size={20} color="var(--plum)" />
         </div>
-        <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 700 }}>{hasHash ? "ورود به پنل مدیریت" : "تعیین رمز پنل مدیریت"}</div>
+        <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 700 }}>ورود به پنل مدیریت</div>
         <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 6, lineHeight: 1.8 }}>
-          {hasHash ? "پنل مدیریت جدا از بخش بیمار و با رمز عبور محافظت می‌شود." : "رمزی بسازید که شامل حرف، عدد و یک نماد باشد تا پنل مدیریت شما محافظت‌شده بماند."}
+          پنل مدیریت جدا از بخش بیمار و فقط با رمز عبورِ شما در دسترس است.
         </div>
         <input
           type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="رمز عبور"
-          onKeyDown={(e) => e.key === "Enter" && (hasHash ? submit() : null)}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
           style={{ ...inputStyle, marginTop: 16, textAlign: "center", letterSpacing: 2 }}
+          autoFocus
         />
-        {!hasHash && (
-          <input
-            type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder="تکرار رمز عبور"
-            onKeyDown={(e) => e.key === "Enter" && submit()}
-            style={{ ...inputStyle, textAlign: "center", letterSpacing: 2 }}
-          />
-        )}
-        {!hasHash && <div style={{ fontSize: 10.5, color: "var(--muted)", marginTop: 6, lineHeight: 1.7 }}>حداقل ۸ کاراکتر، شامل حرف، عدد و یک نماد (مثل !@#$%)</div>}
         {(localErr || error) && <div style={{ color: "var(--coral)", fontSize: 12, marginTop: 8 }}>{localErr || error}</div>}
         <button onClick={submit} disabled={busy} style={{ marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: "none", background: "var(--plum)", color: "#fff", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
-          {busy ? "در حال بررسی…" : hasHash ? "ورود" : "ساخت رمز و ورود"}
+          {busy ? "در حال بررسی…" : "ورود"}
         </button>
         <button onClick={onClose} style={{ all: "unset", cursor: "pointer", marginTop: 12, fontSize: 11.5, color: "var(--muted)", display: "block", marginInline: "auto" }}>انصراف</button>
         <div style={{ marginTop: 14, fontSize: 10, color: "var(--muted)", lineHeight: 1.7 }}>
-          رمز به‌صورت درهم‌سازی‌شده (SHA-256) روی همین دستگاه/فضای ذخیره‌سازی مشترک نگه‌داری می‌شود؛ برای دادهٔ بالینی واقعاً حساس از یک سامانهٔ احراز هویت اختصاصی استفاده کنید.
+          رمز به‌صورت درهم‌سازی‌شده (SHA-256) بررسی می‌شود؛ برای دادهٔ بالینی واقعاً حساس از یک سامانهٔ احراز هویت اختصاصی استفاده کنید.
         </div>
       </div>
     </div>
@@ -1481,7 +1469,7 @@ function App() {
   const [exerciseImages, setExerciseImages] = useState({});
   const [regionAdvice, setRegionAdvice] = useState({});
 
-  const [adminHash, setAdminHash] = useState(""); // "" = رمز هنوز تعیین نشده
+  const [adminHash, setAdminHash] = useState(DEFAULT_ADMIN_HASH);
   const [adminMode, setAdminMode] = useState(false);
   const [showAdminGate, setShowAdminGate] = useState(false);
   const [showChangePw, setShowChangePw] = useState(false);
@@ -1503,8 +1491,8 @@ function App() {
       } catch (e) { setRegionAdvice({}); }
       try {
         const res4 = await window.storage.get("tavanyar-admin-auth-v1", true);
-        setAdminHash(res4 ? res4.value : "");
-      } catch (e) { setAdminHash(""); }
+        setAdminHash(res4 && res4.value ? res4.value : DEFAULT_ADMIN_HASH);
+      } catch (e) { setAdminHash(DEFAULT_ADMIN_HASH); }
       setLoading(false);
       mounted.current = true;
     })();
@@ -1566,14 +1554,6 @@ function App() {
 
   const submitAdminGate = async (pw) => {
     try {
-      if (!adminHash) {
-        const hash = await sha256Hex(pw);
-        await window.storage.set("tavanyar-admin-auth-v1", hash, true);
-        setAdminHash(hash);
-        setAdminMode(true);
-        setShowAdminGate(false);
-        return;
-      }
       const hash = await sha256Hex(pw);
       if (hash === adminHash) {
         setAdminMode(true);
@@ -1716,7 +1696,7 @@ function App() {
         )}
       </div>
 
-      {showAdminGate && <AdminGate hasHash={!!adminHash} onSubmit={submitAdminGate} onClose={() => setShowAdminGate(false)} error={adminError} />}
+      {showAdminGate && <AdminGate onSubmit={submitAdminGate} onClose={() => setShowAdminGate(false)} error={adminError} />}
       {showChangePw && <ChangePasswordModal onSubmit={submitChangePassword} onClose={() => setShowChangePw(false)} />}
     </div>
   );
