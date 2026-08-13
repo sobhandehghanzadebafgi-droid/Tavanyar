@@ -1490,7 +1490,7 @@ function App() {
         setRegionAdvice(res3 ? JSON.parse(res3.value) : {});
       } catch (e) { setRegionAdvice({}); }
       try {
-        const res4 = await window.storage.get("tavanyar-admin-auth-v1", true);
+        const res4 = await window.storage.get("tavanyar-admin-auth-v2", true);
         setAdminHash(res4 && res4.value ? res4.value : DEFAULT_ADMIN_HASH);
       } catch (e) { setAdminHash(DEFAULT_ADMIN_HASH); }
       setLoading(false);
@@ -1572,7 +1572,7 @@ function App() {
     if (currentHash !== adminHash) return false;
     const newHash = await sha256Hex(nextPw);
     setAdminHash(newHash);
-    try { await window.storage.set("tavanyar-admin-auth-v1", newHash, true); } catch (e) {}
+    try { await window.storage.set("tavanyar-admin-auth-v2", newHash, true); } catch (e) {}
     setShowChangePw(false);
     return true;
   };
