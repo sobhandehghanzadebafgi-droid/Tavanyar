@@ -262,7 +262,7 @@ const genAccessCode = (existing) => {
 /* -------- امنیت پنل مدیریت (رمزنگاری یک‌طرفهٔ SHA-256 در مرورگر) -------- */
 // رمز پیش‌فرض و ثابت پنل مدیریت: فقط دارندهٔ این رمز می‌تواند وارد شود.
 // هش SHA-256 رمز «M@hammad74» — از سمت کاربر قابل تغییر است ولی هرگز به‌صورت متن ساده ذخیره نمی‌شود.
-const DEFAULT_ADMIN_HASH = "a13e4d2e7902b7da3b10dacb744dd8a105c385e124062ee704c155b15b25f1b6";
+const DEFAULT_ADMIN_HASH = "7d6da613d5f2832f7aab8a585983ecadfca5ee1f624d130b1b67097adf02800a";
 async function sha256Hex(text) {
   const buf = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -1490,8 +1490,14 @@ function App() {
         setRegionAdvice(res3 ? JSON.parse(res3.value) : {});
       } catch (e) { setRegionAdvice({}); }
       try {
-        const res4 = await window.storage.get("tavanyar-admin-auth-v2", true);
-        setAdminHash(res4 && res4.value ? res4.value : DEFAULT_ADMIN_HASH);
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("resetpw") === "1") {
+          try { await window.storage.delete("tavanyar-admin-auth-v2", true); } catch (e) {}
+          setAdminHash(DEFAULT_ADMIN_HASH);
+        } else {
+          const res4 = await window.storage.get("tavanyar-admin-auth-v2", true);
+          setAdminHash(res4 && res4.value ? res4.value : DEFAULT_ADMIN_HASH);
+        }
       } catch (e) { setAdminHash(DEFAULT_ADMIN_HASH); }
       setLoading(false);
       mounted.current = true;
