@@ -2,8 +2,13 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0F766E" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 <title>توان‌یار — دستیار هوشمند تجویز ورزش توانبخشی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@500;600&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
@@ -12,7 +17,7 @@
   #root { min-height: 100vh; }
   #boot-msg {
     min-height: 100vh; display:flex; align-items:center; justify-content:center;
-    font-family: Inter, sans-serif; color:#5B6B66; direction: rtl; text-align:center; padding: 24px; font-size: 14px;
+    font-family: Vazirmatn, sans-serif; color:#5B6B66; direction: rtl; text-align:center; padding: 24px; font-size: 14px;
   }
 </style>
 </head>
@@ -39,7 +44,7 @@
       try {
         window.localStorage.setItem(key, value);
         return { key: key, value: value, shared: !!shared };
-      } catch (e) { return null; }
+      } catch (e) { return { error: e && e.name }; }
     },
     async delete(key, shared) {
       try {
@@ -57,11 +62,10 @@
 </script>
 
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useRef, useMemo } = React;
 
-/* -------- آیکون‌های ساده (جایگزین lucide-react، بدون وابستگی به CDN) -------- */
-function Ic(props) {
-  const { size = 18, color = "currentColor", style, children, viewBox = "0 0 24 24" } = props;
+/* ===================== آیکون‌ها ===================== */
+function Ic({ size = 18, color = "currentColor", style, children, viewBox = "0 0 24 24" }) {
   return (
     <svg width={size} height={size} viewBox={viewBox} fill="none" stroke={color}
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}>
@@ -69,7 +73,6 @@ function Ic(props) {
     </svg>
   );
 }
-
 const Plus = (p) => <Ic {...p}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></Ic>;
 const User = (p) => <Ic {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></Ic>;
 const Users = (p) => <Ic {...p}><circle cx="9" cy="8" r="3.3" /><path d="M2.5 21c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><circle cx="17" cy="8" r="2.6" /><path d="M15.5 21c.2-2.8 1.9-4.9 4.5-5.2" /></Ic>;
@@ -83,6 +86,7 @@ const Search = (p) => <Ic {...p}><circle cx="10.5" cy="10.5" r="6.5" /><line x1=
 const Stethoscope = (p) => <Ic {...p}><path d="M6 3v6a4 4 0 0 0 8 0V3" /><circle cx="18" cy="15" r="2.6" /><path d="M14 9v3a4 4 0 0 0 4 4" /><line x1="6" y1="3" x2="4.4" y2="3" /><line x1="14" y1="3" x2="15.6" y2="3" /></Ic>;
 const ClipboardList = (p) => <Ic {...p}><rect x="5" y="4" width="14" height="17" rx="2" /><rect x="9" y="2.3" width="6" height="3" rx="1" /><line x1="8" y1="11" x2="16" y2="11" /><line x1="8" y1="15" x2="16" y2="15" /><line x1="8" y1="19" x2="13" y2="19" /></Ic>;
 const TrendingUp = (p) => <Ic {...p}><polyline points="3,17 10,10 14,14 21,6" /><polyline points="15,6 21,6 21,12" /></Ic>;
+const TrendingDown = (p) => <Ic {...p}><polyline points="3,7 10,14 14,10 21,18" /><polyline points="15,18 21,18 21,12" /></Ic>;
 const Trash2 = (p) => <Ic {...p}><line x1="4" y1="7" x2="20" y2="7" /><path d="M6 7v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7" /><path d="M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></Ic>;
 const Edit3 = (p) => <Ic {...p}><path d="M4 20.5 4.7 17 16 5.7a1.7 1.7 0 0 1 2.4 0l1 1a1.7 1.7 0 0 1 0 2.4L8 20.4z" /><line x1="14.3" y1="7.4" x2="17.6" y2="10.7" /></Ic>;
 const Move = (p) => <Ic {...p}><polyline points="8,4 12,1 16,4" /><polyline points="8,20 12,23 16,20" /><polyline points="4,8 1,12 4,16" /><polyline points="20,8 23,12 20,16" /><line x1="1" y1="12" x2="23" y2="12" /><line x1="12" y1="1" x2="12" y2="23" /></Ic>;
@@ -90,26 +94,42 @@ const Zap = (p) => <Ic {...p}><polygon points="13,2 4,14 11,14 10,22 20,9 13,9" 
 const Dumbbell = (p) => <Ic {...p}><rect x="1.5" y="9" width="3" height="6" rx="1" /><rect x="19.5" y="9" width="3" height="6" rx="1" /><line x1="6" y1="12" x2="18" y2="12" /><rect x="4.5" y="7" width="2.5" height="10" rx="1" /><rect x="17" y="7" width="2.5" height="10" rx="1" /></Ic>;
 const Target = (p) => <Ic {...p}><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.4" fill={p.color || "currentColor"} /></Ic>;
 const Waves = (p) => <Ic {...p}><path d="M2 8c1.6-2 3.6-2 5.2 0s3.6 2 5.2 0 3.6-2 5.2 0 3.6 2 5.2 0" /><path d="M2 14c1.6-2 3.6-2 5.2 0s3.6 2 5.2 0 3.6-2 5.2 0 3.6 2 5.2 0" /><path d="M2 20c1.6-2 3.6-2 5.2 0s3.6 2 5.2 0 3.6-2 5.2 0 3.6 2 5.2 0" /></Ic>;
-const Footprints = (p) => <Ic {...p}><ellipse cx="7.5" cy="8" rx="2.6" ry="3.6" transform="rotate(-18 7.5 8)" /><ellipse cx="16.5" cy="17" rx="2.6" ry="3.6" transform="rotate(18 16.5 17)" /><circle cx="11" cy="4" r="1" /><circle cx="20" cy="13" r="1" /></Ic>;
+const Footprints = (p) => <Ic {...p}><ellipse cx="7.5" cy="8" rx="2.6" ry="3.6" transform="rotate(-18 7.5 8)" /><ellipse cx="16.5" cy="17" rx="2.6" ry="3.6" transform="rotate(18 16.5 17)" /></Ic>;
 const Sparkles = (p) => <Ic {...p}><path d="M11 3 12.4 8 17 9.4 12.4 10.8 11 16 9.6 10.8 5 9.4 9.6 8Z" /><path d="M18.5 14 19.2 16.4 21.5 17.2 19.2 18 18.5 20.4 17.8 18 15.5 17.2 17.8 16.4Z" /></Ic>;
 const Info = (p) => <Ic {...p}><circle cx="12" cy="12" r="9.2" /><line x1="12" y1="11" x2="12" y2="16.5" /><circle cx="12" cy="7.6" r="0.6" fill={p.color || "currentColor"} /></Ic>;
 const Lock = (p) => <Ic {...p}><rect x="4.5" y="10.5" width="15" height="10" rx="2" /><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5" /></Ic>;
-const KeyRound = (p) => <Ic {...p}><circle cx="8" cy="15.5" r="4.3" /><path d="M11 12.5 20 3.5" /><path d="M16.5 7 19 9.5" /><path d="M14 9.5 16 11.5" /></Ic>;
+const KeyRound = (p) => <Ic {...p}><circle cx="8" cy="15.5" r="4.3" /><path d="M11 12.5 20 3.5" /><path d="M16.5 7 19 9.5" /></Ic>;
 const LogOut = (p) => <Ic {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="15,17 20,12 15,7" /><line x1="20" y1="12" x2="8" y2="12" /></Ic>;
+const Sun = (p) => <Ic {...p}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></Ic>;
+const Moon = (p) => <Ic {...p}><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z" /></Ic>;
+const Play = (p) => <Ic {...p}><polygon points="7,4 20,12 7,20" /></Ic>;
+const Pause = (p) => <Ic {...p}><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></Ic>;
+const RotateCcw = (p) => <Ic {...p}><polyline points="1,4 1,10 7,10" /><path d="M3.5 15a8 8 0 1 0 .7-8.7L1 10" /></Ic>;
+const Printer = (p) => <Ic {...p}><path d="M6 9V3h12v6" /><rect x="6" y="13" width="12" height="8" /><path d="M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /></Ic>;
+const Download = (p) => <Ic {...p}><path d="M12 3v12" /><polyline points="7,11 12,16 17,11" /><path d="M4 21h16" /></Ic>;
+const Upload = (p) => <Ic {...p}><path d="M12 21V9" /><polyline points="7,13 12,8 17,13" /><path d="M4 3h16" /></Ic>;
+const Copy = (p) => <Ic {...p}><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M4 16V4h12" /></Ic>;
+const Message = (p) => <Ic {...p}><path d="M4 5h16v11H7l-3 3z" /></Ic>;
+const Calendar = (p) => <Ic {...p}><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></Ic>;
+const Home = (p) => <Ic {...p}><path d="M3 11.5 12 4l9 7.5" /><path d="M6 10.5V20h12v-9.5" /></Ic>;
+const Timer = (p) => <Ic {...p}><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 1.5M9 3h6" /></Ic>;
+const Flag = (p) => <Ic {...p}><path d="M5 21V4h9l-1.5 4L19 8l-1.5 4H5" /></Ic>;
+const Layout = (p) => <Ic {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></Ic>;
 
-/* -------- نمودار خطی سادهٔ SVG (جایگزین recharts، بدون وابستگی خارجی) -------- */
+/* ===================== نمودار ===================== */
 function MiniLineChart({ data, series, height = 160 }) {
   const width = 640;
-  const padding = { top: 12, right: 14, bottom: 26, left: 26 };
+  const padding = { top: 12, right: 14, bottom: 26, left: 28 };
   const innerW = width - padding.left - padding.right;
   const innerH = height - padding.top - padding.bottom;
   const n = data.length;
+  if (!n) return <div className="muted" style={{ padding: 20, textAlign: "center" }}>داده‌ای نیست</div>;
   const xStep = n > 1 ? innerW / (n - 1) : 0;
   const yMin = 0, yMax = 10;
   const yScale = (v) => padding.top + innerH - ((v - yMin) / (yMax - yMin)) * innerH;
   const xScale = (i) => padding.left + i * xStep;
   const gridVals = [0, 2, 4, 6, 8, 10];
-
+  const step = Math.max(1, Math.ceil(n / 8));
   return (
     <div>
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio="none" style={{ display: "block", direction: "ltr" }}>
@@ -120,7 +140,7 @@ function MiniLineChart({ data, series, height = 160 }) {
           </g>
         ))}
         {data.map((d, i) => (
-          n <= 10 || i % Math.ceil(n / 10) === 0 ? (
+          i % step === 0 || i === n - 1 ? (
             <text key={i} x={xScale(i)} y={height - 6} fontSize="9" textAnchor="middle" fill="var(--muted)">{d.date}</text>
           ) : null
         ))}
@@ -128,16 +148,16 @@ function MiniLineChart({ data, series, height = 160 }) {
           const points = data.map((d, i) => `${xScale(i)},${yScale(d[s.key] ?? 0)}`).join(" ");
           return (
             <g key={s.key}>
-              <polyline points={points} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <polyline points={points} fill="none" stroke={s.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
               {data.map((d, i) => <circle key={i} cx={xScale(i)} cy={yScale(d[s.key] ?? 0)} r="3" fill={s.color} />)}
             </g>
           );
         })}
       </svg>
       {series.length > 1 && (
-        <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 6 }}>
+        <div className="row" style={{ gap: 14, justifyContent: "center", marginTop: 6 }}>
           {series.map((s) => (
-            <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "var(--muted)" }}>
+            <div key={s.key} className="row" style={{ gap: 5, fontSize: 11.5, color: "var(--muted)" }}>
               <span style={{ width: 8, height: 8, borderRadius: 999, background: s.color }} />
               {s.label}
             </div>
@@ -148,23 +168,21 @@ function MiniLineChart({ data, series, height = 160 }) {
   );
 }
 
-
-/* ---------------------------------- داده‌ها ---------------------------------- */
-
+/* ===================== داده‌ها ===================== */
 const REGIONS = [
-  { id: "cervical", label: "گردن" },
-  { id: "shoulder", label: "شانه" },
-  { id: "lumbar", label: "کمر" },
-  { id: "hip", label: "لگن و باسن" },
-  { id: "knee", label: "زانو" },
-  { id: "ankle", label: "مچ پا و کف پا" },
-  { id: "core", label: "مرکز بدن (Core)" },
+  { id: "cervical", label: "گردن", hint: "مهره‌های گردنی و ذوزنقه" },
+  { id: "shoulder", label: "شانه", hint: "کمربند شانه‌ای و کتف" },
+  { id: "lumbar", label: "کمر", hint: "ستون فقرات کمری" },
+  { id: "hip", label: "لگن و باسن", hint: "مفصل ران و گلوتئال" },
+  { id: "knee", label: "زانو", hint: "مفصل زانو و چهارسر" },
+  { id: "ankle", label: "مچ پا و کف پا", hint: "مچ، آشیل و کف پا" },
+  { id: "core", label: "مرکز بدن (Core)", hint: "شکم، دیافراگم و ثبات تنه" },
 ];
 
 const RED_FLAGS = [
   { id: "weightloss", label: "کاهش وزن غیرقابل‌توجیه" },
   { id: "nightpain", label: "درد شبانه بدون تسکین با تغییر وضعیت" },
-  { id: "neuro", label: "علائم عصبی پیش‌رونده (ضعف/بی‌حسی رو به وخامت)" },
+  { id: "neuro", label: "علائم عصبی پیش‌رونده (ضعف/بی‌حسی روبه‌وخامت)" },
   { id: "bowelbladder", label: "اختلال جدید مثانه یا روده" },
   { id: "trauma", label: "سابقه تروما یا شکستگی اخیر" },
   { id: "infection", label: "تب یا سابقه بدخیمی/عفونت" },
@@ -183,10 +201,19 @@ const CATEGORY_META = {
 const DOSAGE = {
   isometric: { 1: "۳ ست × نگه‌داری ۱۰ ثانیه", 2: "۳ ست × نگه‌داری ۱۵ ثانیه", 3: "۴ ست × نگه‌داری ۲۰ تا ۳۰ ثانیه" },
   mobility: { 1: "۲ ست × ۱۰ تکرار آرام، فقط دامنه بدون درد", 2: "۳ ست × ۱۲ تکرار، دامنه کامل", 3: "۳ ست × ۱۵ تکرار" },
-  strength: { 1: "۲ ست × ۸ تکرار بدون مقاومت اضافه", 2: "۳ ست × ۱۲ تکرار با مقاومت سبک (کش زرد/قرمز)", 3: "۳ تا ۴ ست × ۱۵ تکرار با مقاومت متوسط تا سنگین" },
+  strength: { 1: "۲ ست × ۸ تکرار بدون مقاومت اضافه", 2: "۳ ست × ۱۲ تکرار با مقاومت سبک", 3: "۳ تا ۴ ست × ۱۵ تکرار با مقاومت متوسط تا سنگین" },
   stability: { 1: "۲ ست × ۵ تکرار، نگه‌داری ۳ ثانیه (تحت نظر)", 2: "۲ ست × ۸ تکرار، نگه‌داری ۵ ثانیه", 3: "۳ ست × ۱۲ تکرار، نگه‌داری ۱۰ ثانیه" },
   stretch: { 1: "۲ ست × نگه‌داری ۱۵ تا ۲۰ ثانیه", 2: "۳ ست × نگه‌داری ۲۰ تا ۳۰ ثانیه", 3: "۳ ست × نگه‌داری ۳۰ ثانیه" },
   aerobic: { 1: "۵ تا ۱۰ دقیقه پیاده‌روی آرام، روزانه", 2: "۱۵ تا ۲۰ دقیقه با شدت متوسط، ۴ تا ۵ بار در هفته", 3: "۲۵ تا ۳۰ دقیقه، ۳ تا ۴ بار در هفته" },
+};
+
+const HOLD_SEC = {
+  isometric: { 1: 10, 2: 15, 3: 25 },
+  stretch: { 1: 18, 2: 25, 3: 30 },
+  mobility: { 1: 0, 2: 0, 3: 0 },
+  strength: { 1: 0, 2: 0, 3: 0 },
+  stability: { 1: 3, 2: 5, 3: 10 },
+  aerobic: { 1: 0, 2: 0, 3: 0 },
 };
 
 const EXERCISES = [
@@ -201,6 +228,7 @@ const EXERCISES = [
   { id: "sh3", name: "چرخش خارجی با تراباند", region: "shoulder", category: "strength", startPhase: 2, posture: "standing", motion: "armRotateElbow", cues: "آرنج چسبیده به بدن، کش را به‌سمت بیرون بکشید.", ref: "Kolber – Shoulder Rehabilitation Protocols" },
   { id: "sh4", name: "پرس‌آپ دیواری (Wall Push-up Plus)", region: "shoulder", category: "strength", startPhase: 2, posture: "standing", motion: "armPress", cues: "دست‌ها روی دیوار؛ در انتهای فشار، کتف را کمی از هم باز کنید.", ref: "JOSPT CPG – Shoulder Impingement" },
   { id: "sh5", name: "کشش خلفی کپسول شانه (Sleeper Stretch)", region: "shoulder", category: "stretch", startPhase: 2, posture: "sidelying", motion: "forearmRotate", cues: "به پهلو دراز بکشید و ساعد را به‌آرامی به سمت پایین فشار دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "sh6", name: "جمع کردن کتف‌ها", region: "shoulder", category: "isometric", startPhase: 1, posture: "standing", motion: "armPress", cues: "شانه‌ها را پایین نگه دارید و کتف‌ها را به هم نزدیک کنید؛ ۵ ثانیه نگه دارید.", ref: "Sahrmann – Movement Impairment Syndromes" },
 
   { id: "lb1", name: "تیلت لگن (Pelvic Tilt)", region: "lumbar", category: "mobility", startPhase: 1, posture: "supine", motion: "pelvicRock", cues: "به پشت دراز بکشید؛ با سفت‌کردن شکم، کمر را به زمین نزدیک کنید.", ref: "McKenzie – Mechanical Diagnosis and Therapy" },
   { id: "lb2", name: "زانو به سینه", region: "lumbar", category: "stretch", startPhase: 1, posture: "supine", motion: "kneeToChest", cues: "زانو را با دو دست به‌آرامی به سمت سینه بکشید.", ref: "Kisner & Colby – Therapeutic Exercise" },
@@ -208,27 +236,32 @@ const EXERCISES = [
   { id: "lb4", name: "پرس‌آپ مکنزی", region: "lumbar", category: "mobility", startPhase: 2, posture: "prone", motion: "pressUp", cues: "به شکم دراز بکشید و با دست‌ها بالاتنه را آرام بالا بیاورید؛ لگن روی زمین بماند.", ref: "McKenzie – Mechanical Diagnosis and Therapy", caution: "در صورت افزایش درد پا یا بی‌حسی، متوقف شود." },
   { id: "lb5", name: "پل لگن (Bridging)", region: "lumbar", category: "strength", startPhase: 2, posture: "supine", motion: "bridgeLift", cues: "زانوها خم؛ با فشار پاشنه‌ها، لگن را از زمین بلند کنید.", ref: "APTA CPG – Low Back Pain" },
   { id: "lb6", name: "پرنده–سگ (Bird-Dog)", region: "lumbar", category: "stability", startPhase: 2, posture: "quadruped", motion: "birdDog", cues: "چهاردست‌وپا؛ دست و پای مخالف را هم‌زمان صاف کرده و ثابت نگه دارید.", ref: "APTA CPG – Low Back Pain" },
+  { id: "lb7", name: "کشش همسترینگ خوابیده", region: "lumbar", category: "stretch", startPhase: 2, posture: "supine", legMode: "straight", motion: "legRaiseStraight", cues: "یک پا را صاف بالا بیاورید تا کشش پشت ران حس شود؛ زانو خم نشود.", ref: "Kisner & Colby – Therapeutic Exercise" },
 
   { id: "hp1", name: "کلم‌شل (Clamshell)", region: "hip", category: "strength", startPhase: 1, posture: "sidelying", motion: "topKneeOpen", cues: "به پهلو، زانوها خم؛ زانوی بالایی را مثل صدف باز کنید، لگن ثابت بماند.", ref: "Sahrmann – Movement Impairment Syndromes" },
   { id: "hp2", name: "ابداکشن هیپ ایستاده", region: "hip", category: "strength", startPhase: 2, posture: "standing", motion: "legAbduct", cues: "کنار دیوار بایستید و پا را مستقیم به بیرون بلند کنید.", ref: "JOSPT CPG – Hip" },
   { id: "hp3", name: "کشش فلکسور هیپ (نیم‌زانو)", region: "hip", category: "stretch", startPhase: 2, posture: "kneeling", motion: "sink", cues: "نیم‌زانو بزنید و با پیش‌بردن لگن، کشش جلوی ران را احساس کنید.", ref: "Kisner & Colby – Therapeutic Exercise" },
   { id: "hp4", name: "پل تک‌پا", region: "hip", category: "strength", startPhase: 3, posture: "supine", motion: "bridgeLift", cues: "یک پا صاف در هوا؛ با پای دیگر لگن را بالا ببرید.", ref: "JOSPT CPG – Hip" },
+  { id: "hp5", name: "انقباض ایزومتریک باسن", region: "hip", category: "isometric", startPhase: 1, posture: "supine", motion: "bridgeLift", cues: "به پشت، عضلات باسن را سفت کنید و ۵ ثانیه نگه دارید بدون بلند کردن زیاد لگن.", ref: "Sahrmann – Movement Impairment Syndromes" },
 
   { id: "kn1", name: "کوادریسپس ست (Quad Set)", region: "knee", category: "isometric", startPhase: 1, posture: "supine", legMode: "straight", motion: "quadPulse", cues: "زانو صاف؛ عضله جلوی ران را منقبض کرده و پشت زانو را به زمین فشار دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
   { id: "kn2", name: "لغزش پاشنه (Heel Slides)", region: "knee", category: "mobility", startPhase: 1, posture: "supine", legMode: "bent", motion: "heelSlide", cues: "به پشت دراز بکشید و پاشنه را روی زمین به‌سمت باسن بلغزانید.", ref: "JOSPT CPG – Knee OA" },
   { id: "kn3", name: "بلند کردن پای صاف (SLR)", region: "knee", category: "strength", startPhase: 2, posture: "supine", legMode: "straight", motion: "legRaiseStraight", cues: "زانو کاملاً صاف؛ پا را تا ارتفاع زانوی مقابل بالا بیاورید.", ref: "JOSPT CPG – Knee OA" },
   { id: "kn4", name: "مینی‌اسکات دیواری", region: "knee", category: "strength", startPhase: 2, posture: "standing", motion: "squatBend", cues: "پشت به دیوار؛ زانوها را تا حدود ۴۵ درجه خم کنید.", ref: "Escamilla – Knee Biomechanics in Squatting" },
   { id: "kn5", name: "گام جانبی با کش", region: "knee", category: "stability", startPhase: 3, posture: "standing", motion: "stepSide", cues: "کش دور مچ پا یا زانو؛ گام‌های جانبی کنترل‌شده بردارید.", ref: "JOSPT CPG – Knee" },
+  { id: "kn6", name: "نشستن و برخاستن از صندلی", region: "knee", category: "strength", startPhase: 2, posture: "standing", motion: "squatBend", cues: "از صندلی بدون کمک دست برخیزید و آرام بنشینید؛ زانو از پنجه جلو نزند.", ref: "JOSPT CPG – Knee OA" },
 
   { id: "ak1", name: "پمپاژ مچ پا (Ankle Pumps)", region: "ankle", category: "mobility", startPhase: 1, posture: "supine", legMode: "straight", motion: "footFlex", cues: "نوک پا را به سمت بالا و پایین حرکت دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
   { id: "ak2", name: "چرخش دایره‌ای مچ", region: "ankle", category: "mobility", startPhase: 1, posture: "supine", legMode: "straight", motion: "footCircle", cues: "مچ پا را به‌آرامی به‌صورت دایره‌ای بچرخانید.", ref: "Kisner & Colby – Therapeutic Exercise" },
   { id: "ak3", name: "بلند شدن روی پنجه (Heel Raise)", region: "ankle", category: "strength", startPhase: 2, posture: "standing", motion: "heelRaise", cues: "روی هر دو پا بایستید و پاشنه‌ها را از زمین بلند کنید.", ref: "JOSPT CPG – Ankle" },
   { id: "ak4", name: "تعادل تک‌پا", region: "ankle", category: "stability", startPhase: 3, posture: "standing", motion: "balance", cues: "روی یک پا بایستید و تعادل را حفظ کنید؛ در صورت نیاز نزدیک دیوار.", ref: "JOSPT CPG – Ankle" },
+  { id: "ak5", name: "کشش عضله دوقلو روی دیوار", region: "ankle", category: "stretch", startPhase: 2, posture: "standing", motion: "sink", cues: "یک پا عقب، پاشنه روی زمین؛ به دیوار تکیه دهید تا کشش پشت ساق حس شود.", ref: "JOSPT CPG – Ankle" },
 
   { id: "co1", name: "پلانک اصلاح‌شده (روی زانو)", region: "core", category: "isometric", startPhase: 2, posture: "prone", kneeSupport: true, motion: "holdPulse", cues: "روی ساعد و زانوها؛ بدن را در یک خط راست نگه دارید.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
   { id: "co2", name: "دد باگ (Dead Bug)", region: "core", category: "stability", startPhase: 2, posture: "supine", legMode: "straight", motion: "deadBug", cues: "به پشت دراز بکشید؛ دست و پای مخالف را هم‌زمان صاف کنید بدون افتادن کمر.", ref: "Sahrmann – Movement Impairment Syndromes" },
   { id: "co3", name: "پلانک کامل", region: "core", category: "isometric", startPhase: 3, posture: "prone", kneeSupport: false, motion: "holdPulse", cues: "روی ساعد و نوک پا؛ بدن کاملاً صاف و منقبض.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
   { id: "co4", name: "پیاده‌روی سریع", region: "core", category: "aerobic", startPhase: 1, posture: "standing", motion: "walk", cues: "با سرعت راحت شروع کرده و به‌تدریج زمان و شدت را افزایش دهید.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
+  { id: "co5", name: "پلانک جانبی روی زانو", region: "core", category: "isometric", startPhase: 2, posture: "sidelying", motion: "holdPulse", cues: "روی ساعد و زانوی پایینی؛ بدن را در یک خط از سر تا زانو نگه دارید.", ref: "ACSM Guidelines" },
 ];
 
 const PHASE_META = {
@@ -237,8 +270,15 @@ const PHASE_META = {
   3: { label: "بازتوانی عملکردی", color: "var(--sage)", short: "فاز ۳" },
 };
 
-/* --------------------------------- کمک‌تابع‌ها --------------------------------- */
+const MOTIVATION = [
+  "هر تکرار کوچک، یک قدم به‌سوی بهبود است.",
+  "ثبات از شدت مهم‌تر است — امروز را هم انجام دهید.",
+  "بدن شما به حرکت هوشمندانه پاسخ می‌دهد.",
+  "درد راهنماست، نه دشمن. در دامنهٔ امن بمانید.",
+  "سه روز پیاپی، عادت می‌سازد. ادامه دهید.",
+];
 
+/* ===================== کمک‌تابع‌ها ===================== */
 function useIsMobile(breakpoint = 760) {
   const [isMobile, setIsMobile] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= breakpoint : false));
   useEffect(() => {
@@ -253,16 +293,18 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const toFa = (n) => String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const faDate = () => new Date().toLocaleDateString("fa-IR", { weekday: "long", day: "numeric", month: "long" });
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const genAccessCode = (existing) => {
   let c;
-  do { c = String(Math.floor(1000 + Math.random() * 9000)); } while (existing.some((p) => p.accessCode === c));
+  do { c = String(Math.floor(1000 + Math.random() * 9000)); } while ((existing || []).some((p) => p.accessCode === c));
   return c;
 };
+const copyText = async (t) => {
+  try { await navigator.clipboard.writeText(t); return true; }
+  catch (e) { return false; }
+};
 
-/* -------- امنیت پنل مدیریت (رمزنگاری یک‌طرفهٔ SHA-256 در مرورگر) -------- */
-// رمز پیش‌فرض و ثابت پنل مدیریت: فقط دارندهٔ این رمز می‌تواند وارد شود.
-// هش SHA-256 رمز «M@hammad74» — از سمت کاربر قابل تغییر است ولی هرگز به‌صورت متن ساده ذخیره نمی‌شود.
-const DEFAULT_ADMIN_HASH = "a13e4d2e7902b7da3b10dacb744dd8a105c385e124062ee704c155b15b25f1b6";
+const DEFAULT_ADMIN_HASH = "7d6da613d5f2832f7aab8a585983ecadfca5ee1f624d130b1b67097adf02800a";
 async function sha256Hex(text) {
   const buf = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -275,7 +317,6 @@ function validatePassword(pw) {
   return "";
 }
 
-/* -------- فشرده‌سازی تصویر حرکات ورزشی پیش از ذخیره -------- */
 function compressImageFile(file, maxW = 860, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -299,7 +340,19 @@ function compressImageFile(file, maxW = 860, quality = 0.82) {
   });
 }
 
-/* -------- زنجیرهٔ روزهای پیاپیِ انجام تمرین (برای انگیزهٔ روانی بیمار) -------- */
+function beep(ok = true) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = ok ? 880 : 420;
+    g.gain.value = 0.05;
+    o.start();
+    setTimeout(() => { o.stop(); ctx.close(); }, 160);
+  } catch (e) {}
+}
+
 function computeStreak(patient) {
   const days = new Set((patient.adherence || []).map((a) => a.date));
   let streak = 0;
@@ -309,10 +362,16 @@ function computeStreak(patient) {
   return streak;
 }
 
+function weekAdherence(patient) {
+  const last7 = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().slice(0, 10); });
+  const doneDays = new Set((patient.adherence || []).filter((a) => last7.includes(a.date)).map((a) => a.date)).size;
+  return Math.round((doneDays / 7) * 100);
+}
+
 function computeAssessment(p) {
   const hasFlag = (p.redFlags || []).length > 0;
   if (hasFlag) {
-    return { phase: 1, reason: "به‌دلیل وجود علامت هشدار، پیش از پیشروی برنامه، ارزیابی بالینی تکمیلی لازم است." };
+    return { phase: 1, reason: "به‌دلیل وجود علامت هشدار، پیش از پیشروی برنامه، ارزیابی بالینی تکمیلی لازم است.", flagged: true };
   }
   let phase;
   if (p.painNRS >= 7) phase = 1;
@@ -325,14 +384,40 @@ function computeAssessment(p) {
     2: "کنترل نسبی درد — افزودن تقویت و تمرینات ثبات کنترل‌شده.",
     3: "درد کم و عملکرد مناسب — تمرکز بر بازگشت به عملکرد و تقویت پیشرفته.",
   };
-  return { phase, reason: reasons[phase] };
+  return { phase, reason: reasons[phase], flagged: false };
 }
 
-function buildProgram(patient) {
+function buildProgram(patient, allExercises) {
   const { phase } = computeAssessment(patient);
-  const suggested = EXERCISES.filter((e) => (patient.regions || []).includes(e.region) && e.startPhase <= phase).map((e) => e.id);
+  const list = allExercises || EXERCISES;
+  const suggested = list.filter((e) => (patient.regions || []).includes(e.region) && e.startPhase <= phase).map((e) => e.id);
   const prevMap = new Map((patient.program || []).map((pi) => [pi.exerciseId, pi]));
-  return suggested.map((id) => prevMap.get(id) || { exerciseId: id, included: true });
+  const ids = [...new Set([...suggested, ...((patient.program || []).map((p) => p.exerciseId))])];
+  return ids.filter((id) => list.some((e) => e.id === id)).map((id) => prevMap.get(id) || { exerciseId: id, included: suggested.includes(id) });
+}
+
+function computeInsights(patient) {
+  const hist = patient.history || [];
+  const adh = patient.adherence || [];
+  const insights = [];
+  if (hist.length >= 4) {
+    const recent = hist.slice(-3).reduce((s, h) => s + h.pain, 0) / 3;
+    const older = hist.slice(0, Math.min(3, hist.length)).reduce((s, h) => s + h.pain, 0) / Math.min(3, hist.length);
+    if (recent < older - 1) insights.push({ type: "good", text: "درد نسبت به ابتدای ثبت، روند کاهشی دارد." });
+    if (recent > older + 1) insights.push({ type: "warn", text: "درد اخیراً افزایش یافته؛ شدت تمرین را بازبینی کنید." });
+  }
+  const streak = computeStreak(patient);
+  if (streak >= 3) insights.push({ type: "good", text: `${toFa(streak)} روز پیاپی تمرین — عادت در حال شکل‌گیری است.` });
+  const deltas = adh.slice(-12).map((a) => (a.painAfter ?? 0) - (a.painBefore ?? 0));
+  if (deltas.length >= 3) {
+    const avg = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+    if (avg > 1.5) insights.push({ type: "warn", text: "بعد از تمرین معمولاً درد بالا می‌رود. دامنه یا مقاومت را کم کنید." });
+    if (avg < -0.8) insights.push({ type: "good", text: "تمرین‌ها معمولاً درد را کم می‌کنند — نشانهٔ خوبی است." });
+  }
+  if (weekAdherence(patient) < 30 && (patient.program || []).some((p) => p.included)) {
+    insights.push({ type: "warn", text: "پایبندی ۷ روز اخیر پایین است. برنامه را ساده‌تر کنید یا هدف روزانه تعیین کنید." });
+  }
+  return insights;
 }
 
 function polarToCartesian(cx, cy, r, angleDeg) {
@@ -346,8 +431,11 @@ function describeArc(cx, cy, r, startAngle, endAngle) {
   return ["M", start.x, start.y, "A", r, r, 0, largeArcFlag, 0, end.x, end.y].join(" ");
 }
 
-/* --------------------------------- فیگورهای انسانی متحرک --------------------------------- */
+function findEx(id, all) {
+  return (all || EXERCISES).find((e) => e.id === id);
+}
 
+/* ===================== فیگورها ===================== */
 function Swing({ id, pivot, from = 0, to, mode = "rotate", duration = 2.2, delay = 0, loop = false, children }) {
   const name = `m-${id}`;
   let kf = "";
@@ -367,7 +455,6 @@ function Swing({ id, pivot, from = 0, to, mode = "rotate", duration = 2.2, delay
     </>
   );
 }
-
 const Seg = (x1, y1, x2, y2, w = 6) => <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--teal)" strokeWidth={w} strokeLinecap="round" />;
 const HeadC = (cx, cy, r = 7.5) => <circle cx={cx} cy={cy} r={r} fill="var(--teal)" />;
 const FigureBase = ({ size, children }) => <svg viewBox="0 0 100 100" width={size} height={size}>{children}</svg>;
@@ -379,7 +466,6 @@ function StandingFigure({ id, motion, size }) {
   let rightLeg = Seg(50, 55, 58, 90, 6);
   let leftLeg = Seg(50, 55, 42, 90, 6);
   let bodyGroup = <>{Seg(50, 21, 50, 55, 6)}{HeadC(50, 14)}</>;
-
   if (motion === "armRaiseHigh") rightArm = <Swing id={id} pivot={shoulder} from={30} to={-150}>{Seg(50, 24, 64, 46, 5.5)}</Swing>;
   if (motion === "armRotateElbow") rightArm = <>{Seg(50, 24, 62, 36, 5.5)}<Swing id={id} pivot={[62, 36]} from={0} to={70}>{Seg(62, 36, 62, 50, 5)}</Swing></>;
   if (motion === "armSwing") {
@@ -389,7 +475,6 @@ function StandingFigure({ id, motion, size }) {
   if (motion === "armPress") bodyGroup = <Swing id={id} pivot={[50, 55]} mode="translateX" to={6} duration={1.6}><>{Seg(50, 21, 50, 55, 6)}{HeadC(50, 14)}</></Swing>;
   if (motion === "legAbduct") rightLeg = <Swing id={id} pivot={hip} from={0} to={28}>{Seg(50, 55, 58, 90, 6)}</Swing>;
   if (motion === "balance") rightLeg = <Swing id={id} pivot={hip} from={0} to={-14} duration={2.6}>{Seg(50, 55, 58, 88, 6)}</Swing>;
-
   if (motion === "squatBend") {
     return (
       <FigureBase size={size}>
@@ -424,10 +509,8 @@ function StandingFigure({ id, motion, size }) {
     rightArm = <Swing id={id + "ra"} pivot={shoulder} from={15} to={-15} duration={1.1}>{Seg(50, 24, 64, 46, 5.5)}</Swing>;
     leftArm = <Swing id={id + "la"} pivot={shoulder} from={-15} to={15} duration={1.1}>{Seg(50, 24, 36, 46, 5.5)}</Swing>;
   }
-
   return <FigureBase size={size}>{leftLeg}{rightLeg}{bodyGroup}{leftArm}{rightArm}</FigureBase>;
 }
-
 function BustFigure({ id, motion, size }) {
   const base = <>{Seg(50, 60, 50, 42, 7)}{HeadC(50, 34, 11)}</>;
   let head = base;
@@ -437,14 +520,12 @@ function BustFigure({ id, motion, size }) {
   if (motion === "pulse") head = <Swing id={id} pivot={[50, 60]} mode="scale" to={1.06} duration={1.4}>{base}</Swing>;
   return <FigureBase size={size}>{Seg(28, 70, 72, 70, 7)}{head}</FigureBase>;
 }
-
 function SupineFigure({ id, motion, size, legMode = "bent" }) {
   const hip = [55, 50], knee = [68, 32], shoulder = [28, 50];
   let torso = Seg(25, 50, 55, 50, 6);
   const staticArm = Seg(28, 50, 25, 40, 5);
   let arm = staticArm;
   let legEl;
-
   if (legMode === "straight") {
     const legLine = Seg(55, 50, 85, 50, 6);
     if (motion === "legRaiseStraight") legEl = <Swing id={id} pivot={hip} from={0} to={-40}>{Seg(55, 50, 85, 50, 6)}</Swing>;
@@ -467,12 +548,9 @@ function SupineFigure({ id, motion, size, legMode = "bent" }) {
       );
     } else legEl = <>{Seg(55, 50, 68, 32, 6)}{Seg(68, 32, 78, 50, 6)}</>;
   }
-
   if (motion === "pelvicRock") torso = <Swing id={id} pivot={hip} from={-4} to={4} duration={2}>{Seg(25, 50, 55, 50, 6)}</Swing>;
-
   return <FigureBase size={size}>{torso}{HeadC(18, 50)}{arm}{legEl}</FigureBase>;
 }
-
 function ProneFigure({ id, motion, size, kneeSupport = false }) {
   const hip = [55, 55];
   const legEnd = kneeSupport ? [78, 68] : [88, 58];
@@ -487,15 +565,8 @@ function ProneFigure({ id, motion, size, kneeSupport = false }) {
   }
   let upper = <>{Seg(25, 55, 55, 55, 6)}{HeadC(18, 55)}</>;
   if (motion === "pressUp") upper = <Swing id={id} pivot={hip} from={0} to={-16} duration={1.8}><>{Seg(25, 55, 55, 55, 6)}{HeadC(18, 55)}</></Swing>;
-  return (
-    <FigureBase size={size}>
-      {upper}
-      {Seg(30, 55, 30, 68, 5)}
-      {Seg(55, 55, legEnd[0], legEnd[1], 6)}
-    </FigureBase>
-  );
+  return <FigureBase size={size}>{upper}{Seg(30, 55, 30, 68, 5)}{Seg(55, 55, legEnd[0], legEnd[1], 6)}</FigureBase>;
 }
-
 function QuadrupedFigure({ id, motion, size }) {
   const shoulder = [28, 42], hip = [60, 42];
   let head = <>{Seg(28, 42, 20, 42, 6)}{HeadC(18, 42)}</>;
@@ -508,7 +579,6 @@ function QuadrupedFigure({ id, motion, size }) {
   }
   return <FigureBase size={size}>{Seg(28, 42, 60, 42, 6)}{head}{frontLeg}{backLeg}</FigureBase>;
 }
-
 function SideLyingFigure({ id, motion, size }) {
   const hip = [55, 32];
   let topThigh = <Swing id={id} pivot={hip} from={0} to={-30} duration={1.8}><>{Seg(55, 34, 70, 48, 6)}{Seg(70, 48, 62, 58, 6)}</></Swing>;
@@ -516,6 +586,15 @@ function SideLyingFigure({ id, motion, size }) {
   if (motion === "forearmRotate") {
     topThigh = <>{Seg(55, 34, 70, 48, 6)}{Seg(70, 48, 62, 58, 6)}</>;
     arm = <>{Seg(30, 30, 40, 30, 5)}<Swing id={id} pivot={[40, 30]} from={-10} to={-55} duration={1.8}>{Seg(40, 30, 40, 18, 5)}</Swing></>;
+  }
+  if (motion === "holdPulse") {
+    return (
+      <FigureBase size={size}>
+        <Swing id={id} mode="scale" to={1.02} duration={1.6}>
+          <>{Seg(26, 40, 70, 40, 6)}{HeadC(20, 40)}{Seg(40, 40, 40, 58, 5)}{Seg(70, 40, 78, 58, 6)}</>
+        </Swing>
+      </FigureBase>
+    );
   }
   return (
     <FigureBase size={size}>
@@ -525,7 +604,6 @@ function SideLyingFigure({ id, motion, size }) {
     </FigureBase>
   );
 }
-
 function KneelingFigure({ id, motion, size }) {
   const hip = [55, 55];
   let upper = <>{Seg(55, 55, 55, 25, 6)}{HeadC(55, 18)}</>;
@@ -538,8 +616,8 @@ function KneelingFigure({ id, motion, size }) {
     </FigureBase>
   );
 }
-
 function ExerciseFigure({ ex, size = 56 }) {
+  if (!ex) return null;
   const props = { id: ex.id, motion: ex.motion, size };
   switch (ex.posture) {
     case "standing": return <StandingFigure {...props} />;
@@ -553,8 +631,43 @@ function ExerciseFigure({ ex, size = 56 }) {
   }
 }
 
-/* --------------------------------- کامپوننت‌های نمایشی کوچک --------------------------------- */
+/* ===================== نقشه بدن ===================== */
+function BodyMap({ selected = [], onToggle, height = 280 }) {
+  const on = (id) => selected.includes(id);
+  const fill = (id) => on(id) ? "var(--teal)" : "var(--map-idle)";
+  const stroke = (id) => on(id) ? "var(--teal-deep)" : "var(--line)";
+  const Region = ({ id, d, title }) => (
+    <path d={d} fill={fill(id)} stroke={stroke(id)} strokeWidth="1.6" className="bodymap-part" onClick={() => onToggle(id)}>
+      <title>{title}</title>
+    </path>
+  );
+  return (
+    <div className="bodymap-wrap">
+      <svg viewBox="0 0 160 280" width="auto" height={height} style={{ display: "block", margin: "0 auto" }}>
+        <circle cx="80" cy="22" r="14" fill="var(--map-idle)" stroke="var(--line)" strokeWidth="1.6" />
+        <Region id="cervical" title="گردن" d="M72 38 h16 v16 h-16 z" />
+        <Region id="shoulder" title="شانه" d="M38 54 h28 v18 H38 z" />
+        <Region id="shoulder" title="شانه" d="M94 54 h28 v18 H94 z" />
+        <Region id="core" title="مرکز بدن" d="M58 72 h44 v40 H58 z" />
+        <Region id="lumbar" title="کمر" d="M60 112 h40 v28 H60 z" />
+        <Region id="hip" title="لگن" d="M54 140 h52 v28 H54 z" />
+        <Region id="knee" title="زانو" d="M56 198 h20 v22 H56 z" />
+        <Region id="knee" title="زانو" d="M84 198 h20 v22 H84 z" />
+        <Region id="ankle" title="مچ پا" d="M56 248 h20 v18 H56 z" />
+        <Region id="ankle" title="مچ پا" d="M84 248 h20 v18 H84 z" />
+        <path d="M58 168 v30" stroke="var(--line)" strokeWidth="10" strokeLinecap="round" fill="none" pointerEvents="none" />
+        <path d="M102 168 v30" stroke="var(--line)" strokeWidth="10" strokeLinecap="round" fill="none" pointerEvents="none" />
+        <path d="M66 220 v28" stroke="var(--line)" strokeWidth="9" strokeLinecap="round" fill="none" pointerEvents="none" />
+        <path d="M94 220 v28" stroke="var(--line)" strokeWidth="9" strokeLinecap="round" fill="none" pointerEvents="none" />
+        <path d="M38 63 H28 v38" stroke="var(--line)" strokeWidth="8" strokeLinecap="round" fill="none" pointerEvents="none" />
+        <path d="M122 63 H132 v38" stroke="var(--line)" strokeWidth="8" strokeLinecap="round" fill="none" pointerEvents="none" />
+      </svg>
+      <div className="muted" style={{ textAlign: "center", fontSize: 11.5, marginTop: 6 }}>روی ناحیهٔ درگیر بزنید</div>
+    </div>
+  );
+}
 
+/* ===================== قطعات UI ===================== */
 function SemiGauge({ value, max = 10, invert = false, label }) {
   const pct = Math.max(0, Math.min(1, value / max));
   const angle = -90 + pct * 180;
@@ -572,94 +685,146 @@ function SemiGauge({ value, max = 10, invert = false, label }) {
         </g>
         <circle cx="60" cy="60" r="4" fill="var(--ink)" />
       </svg>
-      <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: 22, fontWeight: 600, color }}>{toFa(value)}<span style={{ fontSize: 13, color: "var(--muted)" }}>/{toFa(max)}</span></div>
-      <div style={{ fontSize: 12, color: "var(--muted)" }}>{label}</div>
+      <div className="num" style={{ fontSize: 22, fontWeight: 600, color }}>{toFa(value)}<span style={{ fontSize: 13, color: "var(--muted)" }}>/{toFa(max)}</span></div>
+      <div className="muted" style={{ fontSize: 12 }}>{label}</div>
     </div>
   );
 }
-
-function ProgressRing({ value, total, size = 76 }) {
+function ProgressRing({ value, total, size = 76, light = true }) {
   const pct = total > 0 ? value / total : 0;
   const r = (size - 10) / 2;
   const c = 2 * Math.PI * r;
+  const stroke = light ? "#ffffff" : "var(--teal)";
+  const track = light ? "#ffffff33" : "var(--line)";
+  const fg = light ? "#fff" : "var(--ink)";
   return (
     <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#ffffff33" strokeWidth="7" fill="none" />
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#ffffff" strokeWidth="7" fill="none"
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={track} strokeWidth="7" fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={stroke} strokeWidth="7" fill="none"
           strokeDasharray={c} strokeDashoffset={c - pct * c} strokeLinecap="round"
           style={{ transition: "stroke-dashoffset .6s ease" }} />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontFamily: "IBM Plex Mono, monospace", fontWeight: 700, fontSize: 14, color: "#fff" }}>{toFa(value)}/{toFa(total)}</div>
+        <div className="num" style={{ fontWeight: 700, fontSize: 14, color: fg }}>{toFa(value)}/{toFa(total)}</div>
       </div>
     </div>
   );
 }
-
 function StreakBadge({ streak }) {
   if (!streak) return null;
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#ffffff26", borderRadius: 999, padding: "5px 12px", fontSize: 12.5, fontWeight: 700, color: "#fff" }}>
+    <div className="pill-light">
       <span style={{ display: "inline-block", animation: "flamePulse 1.6s ease-in-out infinite" }}>🔥</span>
       {toFa(streak)} روز پیاپی
     </div>
   );
 }
-
 function PhaseBadge({ phase, size = "md" }) {
-  const m = PHASE_META[phase];
+  const m = PHASE_META[phase] || PHASE_META[1];
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 6,
-      background: `${m.color}1a`, color: m.color, border: `1px solid ${m.color}55`,
-      borderRadius: 999, padding: size === "sm" ? "2px 9px" : "4px 12px",
-      fontSize: size === "sm" ? 11 : 13, fontWeight: 600, whiteSpace: "nowrap",
+    <span className="phase-badge" style={{
+      background: `color-mix(in srgb, ${m.color} 12%, transparent)`,
+      color: m.color, border: `1px solid color-mix(in srgb, ${m.color} 40%, transparent)`,
+      padding: size === "sm" ? "2px 9px" : "4px 12px",
+      fontSize: size === "sm" ? 11 : 13,
     }}>
-      <span style={{ width: 6, height: 6, borderRadius: 999, background: m.color }} />
+      <i style={{ width: 6, height: 6, borderRadius: 999, background: m.color }} />
       {m.short} · {m.label}
     </span>
   );
 }
-
 function CategoryTag({ category }) {
   const meta = CATEGORY_META[category];
+  if (!meta) return null;
   const Icon = meta.icon;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "var(--muted)" }}>
+    <span className="row" style={{ gap: 4, fontSize: 11.5, color: "var(--muted)" }}>
       <Icon size={13} /> {meta.label}
     </span>
   );
 }
-
-/* --------------------------------- کارت‌های ورزش --------------------------------- */
-
-function ExerciseDetails({ ex, phase }) {
+function HoldTimer({ seconds, compact }) {
+  const [left, setLeft] = useState(null);
+  const [running, setRunning] = useState(false);
+  useEffect(() => {
+    if (!running || left === null) return;
+    if (left <= 0) { setRunning(false); beep(true); return; }
+    const t = setTimeout(() => setLeft((x) => x - 1), 1000);
+    return () => clearTimeout(t);
+  }, [running, left]);
+  if (!seconds) return null;
+  const start = () => { setLeft(seconds); setRunning(true); };
+  const pct = left === null ? 0 : (seconds - left) / seconds;
   return (
-    <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px dashed var(--line)", display: "grid", gap: 8, fontSize: 13.5 }}>
-      <div style={{ color: "var(--ink)" }}>{ex.cues}</div>
-      {ex.caution && (
-        <div style={{ display: "flex", gap: 6, color: "var(--coral)", background: "#D9645A14", borderRadius: 8, padding: "6px 9px", fontSize: 12.5 }}>
-          <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} /> {ex.caution}
-        </div>
-      )}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: 12.5, background: "var(--paper)", padding: "4px 9px", borderRadius: 8, color: "var(--teal-deep)" }}>
-          {DOSAGE[ex.category][phase]}
-        </span>
-        <span style={{ fontSize: 11.5, color: "var(--muted)", fontStyle: "italic" }}>منبع: {ex.ref}</span>
+    <div className="timer-box">
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <span className="muted" style={{ fontSize: 12 }}><Timer size={13} /> تایمر نگه‌داری</span>
+        <span className="num" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>{left === null ? toFa(seconds) + "ث" : toFa(left)}</span>
+      </div>
+      <div className="timer-track"><div className="timer-fill" style={{ width: `${pct * 100}%` }} /></div>
+      <div className="row" style={{ gap: 8, marginTop: 8 }}>
+        {!running && <button className="btn btn-primary btn-sm" onClick={start}><Play size={13} /> شروع</button>}
+        {running && <button className="btn btn-ghost btn-sm" onClick={() => setRunning(false)}><Pause size={13} /> مکث</button>}
+        <button className="btn btn-ghost btn-sm" onClick={() => { setRunning(false); setLeft(seconds); }}><RotateCcw size={13} /> از نو</button>
       </div>
     </div>
   );
 }
+function Heatmap({ adherence }) {
+  const days = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const set = {};
+  (adherence || []).forEach((a) => { set[a.date] = (set[a.date] || 0) + 1; });
+  return (
+    <div>
+      <div className="heatmap">
+        {days.map((d) => {
+          const n = set[d] || 0;
+          const bg = n === 0 ? "var(--paper-2)" : n === 1 ? "#9AD0C4" : n === 2 ? "#4FA89A" : "var(--teal)";
+          return <div key={d} title={`${d} — ${n}`} className="heat-cell" style={{ background: bg }} />;
+        })}
+      </div>
+      <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>۲۸ روز اخیر — هر خانه یک روز</div>
+    </div>
+  );
+}
+function Toasts({ items }) {
+  if (!items.length) return null;
+  return (
+    <div className="toast-wrap">
+      {items.map((t) => (
+        <div key={t.id} className={`toast toast-${t.type || "info"}`}>{t.msg}</div>
+      ))}
+    </div>
+  );
+}
 
-function LibraryCard({ ex, image, onImageChange }) {
+function ExerciseDetails({ ex, phase }) {
+  return (
+    <div className="ex-details">
+      <div>{ex.cues}</div>
+      {ex.caution && (
+        <div className="caution"><AlertTriangle size={14} /> {ex.caution}</div>
+      )}
+      <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+        <span className="dose">{DOSAGE[ex.category]?.[phase] || ""}</span>
+        {ex.ref && <span className="muted" style={{ fontSize: 11.5, fontStyle: "italic" }}>منبع: {ex.ref}</span>}
+      </div>
+      <HoldTimer seconds={HOLD_SEC[ex.category]?.[phase] || 0} />
+    </div>
+  );
+}
+
+function LibraryCard({ ex, image, onImageChange, onDeleteCustom }) {
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState("");
   const fileRef = useRef(null);
   const region = REGIONS.find((r) => r.id === ex.region);
-
   const handleFile = async (file) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) { setUploadErr("لطفاً یک فایل تصویری انتخاب کنید."); return; }
@@ -670,60 +835,56 @@ function LibraryCard({ ex, image, onImageChange }) {
     } catch (e) { setUploadErr("آپلود تصویر ناموفق بود."); }
     setUploading(false);
   };
-
   return (
-    <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 14, padding: 12 }}>
-      <button onClick={() => setOpen((o) => !o)} style={{ all: "unset", cursor: "pointer", display: "flex", width: "100%", alignItems: "center", gap: 12 }}>
-        <div style={{ background: "var(--paper)", borderRadius: 12, overflow: "hidden", width: 52, height: 52, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {image ? <img src={image} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ExerciseFigure ex={ex} size={52} />}
+    <div className="card pad-sm">
+      <button className="plain-btn row" style={{ width: "100%", gap: 12 }} onClick={() => setOpen((o) => !o)}>
+        <div className="thumb">
+          {image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={52} />}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, fontSize: 14.5 }}>{ex.name}</div>
-          <div style={{ display: "flex", gap: 8, marginTop: 3, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 11.5, color: "var(--teal-deep)", background: "#2C7A7B14", borderRadius: 999, padding: "1px 8px" }}>{region?.label}</span>
+        <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+          <div className="title-sm">{ex.name} {ex.custom && <span className="tag-custom">سفارشی</span>}</div>
+          <div className="row wrap" style={{ gap: 8, marginTop: 3 }}>
+            <span className="tag-teal">{region?.label}</span>
             <CategoryTag category={ex.category} />
             <PhaseBadge phase={ex.startPhase} size="sm" />
-            {image && <span style={{ fontSize: 10.5, color: "var(--sage)", display: "inline-flex", alignItems: "center", gap: 3 }}><Check size={11} /> دارای عکس</span>}
+            {image && <span className="ok-mini"><Check size={11} /> دارای عکس</span>}
           </div>
         </div>
         {open ? <ChevronDown size={18} color="var(--muted)" /> : <ChevronRight size={18} color="var(--muted)" />}
       </button>
       {open && (
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px dashed var(--line)", fontSize: 13.5, display: "grid", gap: 8 }}>
+        <div className="ex-details">
           <div>{ex.cues}</div>
-          {ex.caution && (
-            <div style={{ display: "flex", gap: 6, color: "var(--coral)", background: "#D9645A14", borderRadius: 8, padding: "6px 9px", fontSize: 12.5 }}>
-              <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} /> {ex.caution}
-            </div>
-          )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+          {ex.caution && <div className="caution"><AlertTriangle size={14} /> {ex.caution}</div>}
+          <div className="dose-grid">
             {[1, 2, 3].map((ph) => (
-              <div key={ph} style={{ background: "var(--paper)", borderRadius: 8, padding: "6px 8px" }}>
+              <div key={ph} className="dose-cell">
                 <div style={{ fontSize: 10.5, color: PHASE_META[ph].color, fontWeight: 700, marginBottom: 2 }}>{PHASE_META[ph].short}</div>
-                <div style={{ fontSize: 11.5, color: "var(--muted)" }}>{ex.startPhase <= ph ? DOSAGE[ex.category][ph] : "هنوز مناسب نیست"}</div>
+                <div className="muted" style={{ fontSize: 11.5 }}>{ex.startPhase <= ph ? DOSAGE[ex.category][ph] : "هنوز مناسب نیست"}</div>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: 11.5, color: "var(--muted)", fontStyle: "italic" }}>منبع: {ex.ref}</div>
-
+          {ex.ref && <div className="muted" style={{ fontSize: 11.5, fontStyle: "italic" }}>منبع: {ex.ref}</div>}
           <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px dashed var(--line)" }}>
-            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6, fontWeight: 600 }}>عکس آموزشی حرکت (نمایش داده می‌شود به بیمار)</div>
+            <div className="muted" style={{ fontSize: 12, marginBottom: 6, fontWeight: 600 }}>عکس آموزشی حرکت</div>
             {image && (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <img src={image} alt={ex.name} style={{ width: 64, height: 64, borderRadius: 10, objectFit: "cover", border: "1px solid var(--line)" }} />
-                <button onClick={() => onImageChange(ex.id, null)} style={{ all: "unset", cursor: "pointer", fontSize: 12, color: "var(--coral)", display: "flex", alignItems: "center", gap: 4 }}>
+              <div className="row" style={{ gap: 10, marginBottom: 8 }}>
+                <img src={image} alt={ex.name} className="thumb-img" />
+                <button className="plain-btn danger-text row" style={{ gap: 4, fontSize: 12 }} onClick={() => onImageChange(ex.id, null)}>
                   <Trash2 size={13} /> حذف عکس
                 </button>
               </div>
             )}
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => handleFile(e.target.files && e.target.files[0])} />
-            <button onClick={() => fileRef.current && fileRef.current.click()} disabled={uploading} style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 9, border: "1px solid var(--teal)",
-              background: "#fff", color: "var(--teal-deep)", fontWeight: 600, fontSize: 12.5, cursor: uploading ? "wait" : "pointer",
-            }}>
-              <Plus size={13} /> {uploading ? "در حال آپلود…" : image ? "جایگزینی عکس" : "آپلود عکس"}
-            </button>
-            {uploadErr && <div style={{ color: "var(--coral)", fontSize: 11.5, marginTop: 6 }}>{uploadErr}</div>}
+            <div className="row wrap" style={{ gap: 8 }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => fileRef.current && fileRef.current.click()} disabled={uploading}>
+                <Plus size={13} /> {uploading ? "در حال آپلود…" : image ? "جایگزینی عکس" : "آپلود عکس"}
+              </button>
+              {ex.custom && onDeleteCustom && (
+                <button className="btn btn-danger btn-sm" onClick={() => onDeleteCustom(ex.id)}><Trash2 size={13} /> حذف ورزش سفارشی</button>
+              )}
+            </div>
+            {uploadErr && <div className="danger-text" style={{ fontSize: 11.5, marginTop: 6 }}>{uploadErr}</div>}
           </div>
         </div>
       )}
@@ -731,25 +892,22 @@ function LibraryCard({ ex, image, onImageChange }) {
   );
 }
 
-function ProgramRow({ ex, phase, included, onToggle }) {
+function ProgramRow({ ex, phase, included, onToggle, image }) {
   const [open, setOpen] = useState(false);
+  if (!ex) return null;
   return (
-    <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 14, padding: 12, opacity: included ? 1 : 0.55 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <button onClick={onToggle} title={included ? "حذف از برنامه" : "افزودن به برنامه"} style={{
-          all: "unset", cursor: "pointer", width: 26, height: 26, borderRadius: 8, flexShrink: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: included ? "var(--teal)" : "var(--paper)", border: `1px solid ${included ? "var(--teal)" : "var(--line)"}`,
-        }}>
+    <div className="card pad-sm" style={{ opacity: included ? 1 : 0.55 }}>
+      <div className="row" style={{ gap: 12 }}>
+        <button className={`check-box ${included ? "on" : ""}`} onClick={onToggle} title={included ? "حذف از برنامه" : "افزودن به برنامه"}>
           {included ? <Check size={15} color="#fff" /> : null}
         </button>
-        <div style={{ cursor: "pointer", flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }} onClick={() => setOpen((o) => !o)}>
-          <div style={{ background: "var(--paper)", borderRadius: 11 }}><ExerciseFigure ex={ex} size={48} /></div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 600, fontSize: 14.5 }}>{ex.name}</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 3, alignItems: "center", flexWrap: "wrap" }}>
+        <div className="plain-btn row" style={{ flex: 1, gap: 12, minWidth: 0 }} onClick={() => setOpen((o) => !o)}>
+          <div className="thumb">{image ? <img src={image} alt="" /> : <ExerciseFigure ex={ex} size={48} />}</div>
+          <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+            <div className="title-sm">{ex.name}</div>
+            <div className="row wrap" style={{ gap: 8, marginTop: 3 }}>
               <CategoryTag category={ex.category} />
-              <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: 12, color: "var(--teal-deep)" }}>{DOSAGE[ex.category][phase]}</span>
+              <span className="dose">{DOSAGE[ex.category]?.[phase]}</span>
             </div>
           </div>
           {open ? <ChevronDown size={18} color="var(--muted)" /> : <ChevronRight size={18} color="var(--muted)" />}
@@ -762,31 +920,22 @@ function ProgramRow({ ex, phase, included, onToggle }) {
 
 function ExerciseDetailModal({ ex, phase, image, onClose }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#16232E85", zIndex: 65, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 440, maxHeight: "88vh", overflowY: "auto", boxShadow: "var(--shadow-lg)" }}>
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 440, padding: 0, overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ position: "relative" }}>
           {image ? (
-            <img src={image} alt={ex.name} style={{ width: "100%", maxHeight: 300, objectFit: "cover", display: "block", borderRadius: "18px 18px 0 0" }} />
+            <img src={image} alt={ex.name} style={{ width: "100%", maxHeight: 300, objectFit: "cover", display: "block" }} />
           ) : (
-            <div style={{ background: "var(--paper)", borderRadius: "18px 18px 0 0", padding: "28px 0", display: "flex", justifyContent: "center" }}>
-              <ExerciseFigure ex={ex} size={140} />
-            </div>
+            <div className="fig-hero"><ExerciseFigure ex={ex} size={140} /></div>
           )}
-          <button onClick={onClose} style={{ all: "unset", cursor: "pointer", position: "absolute", top: 10, left: 10, background: "#16232Eaa", borderRadius: 999, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <X size={16} color="#fff" />
-          </button>
+          <button className="icon-btn close-abs" onClick={onClose}><X size={16} color="#fff" /></button>
         </div>
         <div style={{ padding: 20 }}>
-          <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 700 }}>{ex.name}</div>
-          <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 8, lineHeight: 1.9 }}>{ex.cues}</div>
-          <div style={{ marginTop: 12, fontFamily: "IBM Plex Mono, monospace", fontSize: 13, color: "var(--teal-deep)", background: "var(--paper)", display: "inline-block", padding: "5px 12px", borderRadius: 9 }}>
-            {DOSAGE[ex.category][phase]}
-          </div>
-          {ex.caution && (
-            <div style={{ marginTop: 10, display: "flex", gap: 6, color: "var(--coral)", background: "#D9645A14", borderRadius: 8, padding: "8px 10px", fontSize: 12.5 }}>
-              <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} /> {ex.caution}
-            </div>
-          )}
+          <div className="serif" style={{ fontSize: 19 }}>{ex.name}</div>
+          <div className="muted" style={{ fontSize: 14, marginTop: 8, lineHeight: 1.9 }}>{ex.cues}</div>
+          <div className="dose" style={{ marginTop: 12 }}>{DOSAGE[ex.category]?.[phase]}</div>
+          {ex.caution && <div className="caution" style={{ marginTop: 10 }}><AlertTriangle size={14} /> {ex.caution}</div>}
+          <HoldTimer seconds={HOLD_SEC[ex.category]?.[phase] || 0} />
         </div>
       </div>
     </div>
@@ -799,49 +948,36 @@ function PortalCard({ ex, phase, done, onLog, image }) {
   const [after, setAfter] = useState(3);
   const [showDetail, setShowDetail] = useState(false);
   return (
-    <div style={{ background: "var(--card)", border: `1px solid ${done ? "var(--sage)" : "var(--line)"}`, borderRadius: 16, padding: 16 }}>
-      <button onClick={() => setShowDetail(true)} style={{ all: "unset", cursor: "pointer", display: "flex", width: "100%", alignItems: "flex-start", gap: 14 }}>
-        <div style={{ background: "var(--paper)", borderRadius: 14, width: 60, height: 60, flexShrink: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-          {image ? <img src={image} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ExerciseFigure ex={ex} size={60} />}
+    <div className="card pad" style={{ borderColor: done ? "var(--sage)" : "var(--line)" }}>
+      <button className="plain-btn row" style={{ width: "100%", gap: 14, alignItems: "flex-start" }} onClick={() => setShowDetail(true)}>
+        <div className="thumb lg">{image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={60} />}</div>
+        <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
+          <div className="title-md">{ex.name} <span className="muted" style={{ fontSize: 11, fontWeight: 500 }}>· مشاهده</span></div>
+          <div className="clamp2 muted" style={{ fontSize: 13.5, marginTop: 4 }}>{ex.cues}</div>
+          <div className="dose" style={{ marginTop: 8 }}>{DOSAGE[ex.category]?.[phase]}</div>
+          {ex.caution && <div className="danger-text" style={{ marginTop: 6, fontSize: 12 }}>⚠ {ex.caution}</div>}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 6 }}>
-            {ex.name}
-            <span style={{ fontSize: 11, color: "var(--teal-deep)", fontWeight: 500 }}>· مشاهدهٔ عکس و توضیح</span>
-          </div>
-          <div style={{ fontSize: 13.5, color: "var(--muted)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{ex.cues}</div>
-          <div style={{ marginTop: 8, fontFamily: "IBM Plex Mono, monospace", fontSize: 13, color: "var(--teal-deep)", background: "var(--paper)", display: "inline-block", padding: "4px 10px", borderRadius: 8 }}>
-            {DOSAGE[ex.category][phase]}
-          </div>
-          {ex.caution && <div style={{ marginTop: 6, fontSize: 12, color: "var(--coral)" }}>⚠ {ex.caution}</div>}
-        </div>
-        {done && !logging && <span style={{ color: "var(--sage)", display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, fontWeight: 600, flexShrink: 0 }}><Check size={16} /> امروز انجام شد</span>}
+        {done && !logging && <span className="ok-mini" style={{ flexShrink: 0 }}><Check size={16} /> امروز انجام شد</span>}
       </button>
-
       {showDetail && <ExerciseDetailModal ex={ex} phase={phase} image={image} onClose={() => setShowDetail(false)} />}
-
       {!logging && (
-        <button onClick={() => setLogging(true)} style={{
-          marginTop: 12, width: "100%", padding: "9px", borderRadius: 10, border: "none", cursor: "pointer",
-          background: done ? "var(--paper)" : "var(--teal)", color: done ? "var(--teal-deep)" : "#fff", fontWeight: 600, fontSize: 13.5,
-        }}>
+        <button className={`btn ${done ? "btn-ghost" : "btn-primary"}`} style={{ marginTop: 12, width: "100%" }} onClick={() => setLogging(true)}>
           {done ? "ثبت دوباره" : "انجام دادم — ثبت درد"}
         </button>
       )}
-
       {logging && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px dashed var(--line)", display: "grid", gap: 10 }}>
+        <div className="ex-details">
           <div>
-            <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 4 }}>درد پیش از تمرین: {toFa(before)}</div>
+            <div className="muted" style={{ fontSize: 12.5, marginBottom: 4 }}>درد پیش از تمرین: {toFa(before)}</div>
             <input type="range" min="0" max="10" value={before} onChange={(e) => setBefore(+e.target.value)} style={{ width: "100%", accentColor: "var(--coral)" }} />
           </div>
           <div>
-            <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 4 }}>درد پس از تمرین: {toFa(after)}</div>
+            <div className="muted" style={{ fontSize: 12.5, marginBottom: 4 }}>درد پس از تمرین: {toFa(after)}</div>
             <input type="range" min="0" max="10" value={after} onChange={(e) => setAfter(+e.target.value)} style={{ width: "100%", accentColor: "var(--sage)" }} />
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => { onLog(before, after); setLogging(false); }} style={{ flex: 1, padding: "8px", borderRadius: 9, border: "none", background: "var(--teal)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>ثبت</button>
-            <button onClick={() => setLogging(false)} style={{ padding: "8px 14px", borderRadius: 9, border: "1px solid var(--line)", background: "#fff", cursor: "pointer", color: "var(--muted)" }}>انصراف</button>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { onLog(before, after); setLogging(false); }}>ثبت</button>
+            <button className="btn btn-ghost" onClick={() => setLogging(false)}>انصراف</button>
           </div>
         </div>
       )}
@@ -849,69 +985,64 @@ function PortalCard({ ex, phase, done, onLog, image }) {
   );
 }
 
-/* --------------------------------- فرم بیمار --------------------------------- */
-
-const inputStyle = { width: "100%", marginTop: 5, padding: "9px 11px", borderRadius: 10, border: "1px solid var(--line)", fontSize: 14, fontFamily: "Inter, sans-serif", background: "#fff", boxSizing: "border-box" };
-const chip = (active) => ({
-  padding: "6px 12px", borderRadius: 999, fontSize: 12.5, cursor: "pointer",
-  border: `1px solid ${active ? "var(--teal)" : "var(--line)"}`,
-  background: active ? "var(--teal)" : "#fff", color: active ? "#fff" : "var(--ink)", fontWeight: active ? 600 : 400,
-});
-
+/* ===================== فرم بیمار ===================== */
 function PatientFormModal({ initial, onSave, onClose }) {
   const [form, setForm] = useState(initial || {
     name: "", age: "", regions: [], timeSinceOnset: "subacute",
-    painNRS: 5, functionScore: 5, redFlags: [], notes: "",
+    painNRS: 5, functionScore: 5, redFlags: [], notes: "", goal: "",
   });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const toggleArr = (k, id) => setForm((f) => ({ ...f, [k]: f[k].includes(id) ? f[k].filter((x) => x !== id) : [...f[k], id] }));
-
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#16232E77", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto", padding: 22, boxShadow: "var(--shadow-lg)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600 }}>{initial ? "ویرایش بیمار" : "بیمار جدید"}</div>
-          <button onClick={onClose} style={{ all: "unset", cursor: "pointer" }}><X size={20} color="var(--muted)" /></button>
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+        <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
+          <div className="serif" style={{ fontSize: 20 }}>{initial ? "ویرایش بیمار" : "بیمار جدید"}</div>
+          <button className="plain-btn" onClick={onClose}><X size={20} color="var(--muted)" /></button>
         </div>
-
-        <div style={{ display: "grid", gap: 14 }}>
+        <div className="stack">
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>نام بیمار</label>
-            <input value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="مثلاً: خانم احمدی" style={inputStyle} />
+            <label className="lbl">نام بیمار</label>
+            <input className="input" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="مثلاً: خانم احمدی" />
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>سن (اختیاری)</label>
-            <input value={form.age} onChange={(e) => set("age", e.target.value)} type="number" style={inputStyle} />
+            <label className="lbl">سن (اختیاری)</label>
+            <input className="input" value={form.age} onChange={(e) => set("age", e.target.value)} type="number" />
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>ناحیهٔ درگیر</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+            <label className="lbl">ناحیهٔ درگیر — از نقشه یا دکمه‌ها</label>
+            <BodyMap selected={form.regions} onToggle={(id) => toggleArr("regions", id)} height={240} />
+            <div className="row wrap" style={{ gap: 6, marginTop: 8 }}>
               {REGIONS.map((r) => (
-                <button key={r.id} onClick={() => toggleArr("regions", r.id)} style={chip(form.regions.includes(r.id))}>{r.label}</button>
+                <button key={r.id} className={`chip ${form.regions.includes(r.id) ? "on" : ""}`} onClick={() => toggleArr("regions", r.id)}>{r.label}</button>
               ))}
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>مرحلهٔ زمانی</label>
-            <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+            <label className="lbl">مرحلهٔ زمانی</label>
+            <div className="row wrap" style={{ gap: 6, marginTop: 6 }}>
               {[{ id: "acute", l: "حاد (کمتر از ۲ هفته)" }, { id: "subacute", l: "تحت‌حاد (۲ تا ۶ هفته)" }, { id: "chronic", l: "مزمن (بیش از ۶ هفته)" }].map((t) => (
-                <button key={t.id} onClick={() => set("timeSinceOnset", t.id)} style={chip(form.timeSinceOnset === t.id)}>{t.l}</button>
+                <button key={t.id} className={`chip ${form.timeSinceOnset === t.id ? "on" : ""}`} onClick={() => set("timeSinceOnset", t.id)}>{t.l}</button>
               ))}
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>شدت درد فعلی (NRS): {toFa(form.painNRS)}</label>
+            <label className="lbl">شدت درد فعلی (NRS): {toFa(form.painNRS)}</label>
             <input type="range" min="0" max="10" value={form.painNRS} onChange={(e) => set("painNRS", +e.target.value)} style={{ width: "100%", accentColor: "var(--coral)" }} />
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>سطح عملکرد فعلی: {toFa(form.functionScore)}</label>
+            <label className="lbl">سطح عملکرد فعلی: {toFa(form.functionScore)}</label>
             <input type="range" min="0" max="10" value={form.functionScore} onChange={(e) => set("functionScore", +e.target.value)} style={{ width: "100%", accentColor: "var(--sage)" }} />
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>علائم هشدار (در صورت وجود)</label>
-            <div style={{ display: "grid", gap: 5, marginTop: 6 }}>
+            <label className="lbl">هدف درمان (اختیاری)</label>
+            <input className="input" value={form.goal || ""} onChange={(e) => set("goal", e.target.value)} placeholder="مثلاً: پیاده‌روی ۳۰ دقیقه بدون درد" />
+          </div>
+          <div>
+            <label className="lbl">علائم هشدار (در صورت وجود)</label>
+            <div className="stack" style={{ gap: 5, marginTop: 6 }}>
               {RED_FLAGS.map((f) => (
-                <label key={f.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                <label key={f.id} className="row" style={{ gap: 8, fontSize: 13, cursor: "pointer" }}>
                   <input type="checkbox" checked={form.redFlags.includes(f.id)} onChange={() => toggleArr("redFlags", f.id)} />
                   {f.label}
                 </label>
@@ -919,20 +1050,15 @@ function PatientFormModal({ initial, onSave, onClose }) {
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12.5, color: "var(--muted)" }}>یادداشت بالینی (اختیاری)</label>
-            <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={2} style={{ ...inputStyle, resize: "vertical" }} />
+            <label className="lbl">یادداشت بالینی (اختیاری)</label>
+            <textarea className="input" value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={2} />
           </div>
         </div>
-
         <button
+          className="btn btn-primary"
+          style={{ marginTop: 18, width: "100%" }}
           disabled={!form.name || form.regions.length === 0}
           onClick={() => onSave(form)}
-          style={{
-            marginTop: 18, width: "100%", padding: "11px", borderRadius: 11, border: "none",
-            background: !form.name || form.regions.length === 0 ? "var(--line)" : "var(--teal)",
-            color: !form.name || form.regions.length === 0 ? "var(--muted)" : "#fff",
-            fontWeight: 700, fontSize: 14.5, cursor: !form.name || form.regions.length === 0 ? "not-allowed" : "pointer",
-          }}
         >
           {initial ? "ذخیرهٔ تغییرات" : "افزودن بیمار"}
         </button>
@@ -941,16 +1067,89 @@ function PatientFormModal({ initial, onSave, onClose }) {
   );
 }
 
-/* --------------------------------- کنسول پزشک --------------------------------- */
+function CustomExerciseModal({ onSave, onClose }) {
+  const [form, setForm] = useState({
+    name: "", region: "lumbar", category: "mobility", startPhase: 1,
+    posture: "standing", motion: "walk", cues: "", caution: "", ref: "تجویز درمانگر",
+  });
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  return (
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+        <div className="serif" style={{ fontSize: 18, marginBottom: 12 }}>ورزش سفارشی جدید</div>
+        <div className="stack">
+          <div><label className="lbl">نام حرکت</label><input className="input" value={form.name} onChange={(e) => set("name", e.target.value)} /></div>
+          <div>
+            <label className="lbl">ناحیه</label>
+            <select className="input" value={form.region} onChange={(e) => set("region", e.target.value)}>
+              {REGIONS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="lbl">نوع</label>
+            <select className="input" value={form.category} onChange={(e) => set("category", e.target.value)}>
+              {Object.entries(CATEGORY_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="lbl">از فاز</label>
+            <select className="input" value={form.startPhase} onChange={(e) => set("startPhase", +e.target.value)}>
+              <option value={1}>فاز ۱</option><option value={2}>فاز ۲</option><option value={3}>فاز ۳</option>
+            </select>
+          </div>
+          <div><label className="lbl">راهنمای اجرا</label><textarea className="input" rows={3} value={form.cues} onChange={(e) => set("cues", e.target.value)} /></div>
+          <div><label className="lbl">هشدار (اختیاری)</label><input className="input" value={form.caution} onChange={(e) => set("caution", e.target.value)} /></div>
+        </div>
+        <div className="row" style={{ gap: 8, marginTop: 16 }}>
+          <button className="btn btn-primary" style={{ flex: 1 }} disabled={!form.name || !form.cues} onClick={() => onSave({ ...form, id: "cx-" + uid(), custom: true })}>افزودن</button>
+          <button className="btn btn-ghost" onClick={onClose}>انصراف</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-function DoctorConsole({ patients, setPatients, exerciseImages, onImageChange, regionAdvice, onAdviceChange }) {
+function AddFromLibraryModal({ allExercises, existingIds, onAdd, onClose }) {
+  const [q, setQ] = useState("");
+  const list = allExercises.filter((e) => !existingIds.includes(e.id) && (!q || e.name.includes(q)));
+  return (
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 440 }} onClick={(e) => e.stopPropagation()}>
+        <div className="serif" style={{ fontSize: 18, marginBottom: 10 }}>افزودن ورزش به برنامه</div>
+        <div className="search-box" style={{ marginBottom: 10 }}>
+          <Search size={14} color="var(--muted)" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="جستجوی حرکت" />
+        </div>
+        <div style={{ maxHeight: 360, overflowY: "auto" }} className="stack" >
+          {list.length === 0 && <div className="muted" style={{ textAlign: "center", padding: 16 }}>موردی نیست</div>}
+          {list.map((e) => (
+            <button key={e.id} className="plain-btn card pad-sm row" style={{ gap: 10, width: "100%" }} onClick={() => { onAdd(e.id); onClose(); }}>
+              <div className="thumb xs"><ExerciseFigure ex={e} size={40} /></div>
+              <div style={{ flex: 1, textAlign: "right" }}>
+                <div className="title-sm">{e.name}</div>
+                <div className="muted" style={{ fontSize: 11 }}>{REGIONS.find((r) => r.id === e.region)?.label} · {CATEGORY_META[e.category]?.label}</div>
+              </div>
+              <Plus size={16} color="var(--teal)" />
+            </button>
+          ))}
+        </div>
+        <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onClose}>بستن</button>
+      </div>
+    </div>
+  );
+}
+
+/* ===================== کنسول پزشک ===================== */
+function DoctorConsole({ patients, setPatients, exerciseImages, onImageChange, regionAdvice, onAdviceChange, allExercises, customExercises, setCustomExercises, notify }) {
   const isMobile = useIsMobile();
   const [selectedId, setSelectedId] = useState(patients[0]?.id || null);
-  const [tab, setTab] = useState("assess");
+  const [tab, setTab] = useState("home");
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [search, setSearch] = useState("");
   const [libRegion, setLibRegion] = useState("all");
+  const [listFilter, setListFilter] = useState("all");
+  const [showCustom, setShowCustom] = useState(false);
 
   useEffect(() => { if (!selectedId && patients[0]) setSelectedId(patients[0].id); }, [patients]);
   const patient = patients.find((p) => p.id === selectedId);
@@ -958,251 +1157,631 @@ function DoctorConsole({ patients, setPatients, exerciseImages, onImageChange, r
   const updatePatient = (id, updater) => {
     setPatients((prev) => prev.map((p) => (p.id === id ? { ...updater(p), updatedAt: Date.now() } : p)));
   };
-
   const savePatient = (form) => {
     if (editing) {
       updatePatient(editing.id, (p) => ({ ...p, ...form }));
+      notify("تغییرات بیمار ذخیره شد", "ok");
     } else {
-      const np = { id: uid(), accessCode: genAccessCode(patients), ...form, createdAt: Date.now(), history: [{ date: todayStr(), pain: form.painNRS, func: form.functionScore }], program: [], adherence: [] };
+      const np = {
+        id: uid(), accessCode: genAccessCode(patients), ...form,
+        createdAt: Date.now(), history: [{ date: todayStr(), pain: form.painNRS, func: form.functionScore }],
+        program: [], adherence: [], coachNote: "", patientNote: "", messages: [],
+      };
       setPatients((prev) => [...prev, np]);
       setSelectedId(np.id);
+      notify("بیمار افزوده شد", "ok");
     }
     setShowForm(false); setEditing(null);
   };
-
   const removePatient = (id) => {
     setPatients((prev) => prev.filter((p) => p.id !== id));
     if (selectedId === id) setSelectedId(null);
+    notify("بیمار حذف شد");
   };
 
-  const filteredPatients = patients.filter((p) => p.name.includes(search));
+  const filteredPatients = patients.filter((p) => {
+    if (search && !p.name.includes(search)) return false;
+    const a = computeAssessment(p);
+    if (listFilter === "flag" && !a.flagged) return false;
+    if (listFilter === "p1" && a.phase !== 1) return false;
+    if (listFilter === "low" && weekAdherence(p) >= 40) return false;
+    return true;
+  });
+
+  const addDemo = () => {
+    const demo = {
+      id: uid(), accessCode: genAccessCode(patients), name: "بیمار نمونه", age: "42",
+      regions: ["lumbar", "core"], timeSinceOnset: "subacute", painNRS: 5, functionScore: 6,
+      redFlags: [], notes: "کمردرد مکانیکال بدون ردفلگ", goal: "نشستن ۴۵ دقیقه در محل کار بدون درد تیز",
+      createdAt: Date.now(),
+      history: [
+        { date: isoAgo(10), pain: 7, func: 4 },
+        { date: isoAgo(7), pain: 6, func: 5 },
+        { date: isoAgo(3), pain: 5, func: 6 },
+        { date: todayStr(), pain: 5, func: 6 },
+      ],
+      program: [], adherence: [
+        { date: isoAgo(3), exerciseId: "lb1", painBefore: 5, painAfter: 4 },
+        { date: isoAgo(2), exerciseId: "lb3", painBefore: 5, painAfter: 4 },
+        { date: isoAgo(1), exerciseId: "lb5", painBefore: 5, painAfter: 3 },
+      ],
+      coachNote: "حرکات را آرام و بدون حبس نفس انجام دهید.",
+      patientNote: "",
+    };
+    demo.program = buildProgram(demo, allExercises);
+    setPatients((prev) => [...prev, demo]);
+    setSelectedId(demo.id);
+    notify("بیمار نمونه افزوده شد", "ok");
+  };
 
   return (
-    <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 12 : 18, alignItems: "flex-start", maxWidth: 1180, margin: "0 auto", padding: isMobile ? "0 12px" : "0 16px" }}>
-      <div style={{ width: isMobile ? "100%" : 260, flexShrink: 0, background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 14, position: isMobile ? "static" : "sticky", top: isMobile ? undefined : 88 }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6, background: "var(--paper)", borderRadius: 10, padding: "6px 10px" }}>
+    <div className={`doc-layout ${isMobile ? "col" : ""}`}>
+      <aside className="card pad-sm sidebar">
+        <div className="row" style={{ gap: 8, marginBottom: 10 }}>
+          <div className="search-box" style={{ flex: 1 }}>
             <Search size={14} color="var(--muted)" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="جستجوی بیمار" style={{ all: "unset", fontSize: 13, flex: 1 }} />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="جستجوی بیمار" />
           </div>
-          <button onClick={() => { setEditing(null); setShowForm(true); }} title="بیمار جدید" style={{ all: "unset", cursor: "pointer", background: "var(--teal)", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <button className="icon-btn solid" title="بیمار جدید" onClick={() => { setEditing(null); setShowForm(true); }}>
             <Plus size={18} color="#fff" />
           </button>
         </div>
-        <div style={{ display: "grid", gap: 6, maxHeight: isMobile ? 240 : 520, overflowY: "auto" }}>
-          {filteredPatients.length === 0 && <div style={{ fontSize: 12.5, color: "var(--muted)", padding: 10, textAlign: "center" }}>بیماری یافت نشد</div>}
+        <div className="row wrap" style={{ gap: 4, marginBottom: 8 }}>
+          {[{ id: "all", l: "همه" }, { id: "flag", l: "هشدار" }, { id: "p1", l: "فاز ۱" }, { id: "low", l: "پایبندی کم" }].map((f) => (
+            <button key={f.id} className={`chip xs ${listFilter === f.id ? "on" : ""}`} onClick={() => setListFilter(f.id)}>{f.l}</button>
+          ))}
+        </div>
+        <div className="patient-list">
+          {filteredPatients.length === 0 && <div className="muted" style={{ fontSize: 12.5, padding: 10, textAlign: "center" }}>بیماری یافت نشد</div>}
           {filteredPatients.map((p) => {
             const a = computeAssessment(p);
             return (
-              <button key={p.id} onClick={() => setSelectedId(p.id)} style={{
-                all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 11,
-                background: selectedId === p.id ? "var(--paper)" : "transparent", border: selectedId === p.id ? "1px solid var(--teal)" : "1px solid transparent",
-              }}>
-                <div style={{ width: 34, height: 34, borderRadius: 999, background: `${PHASE_META[a.phase].color}22`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <button key={p.id} className={`patient-item ${selectedId === p.id ? "active" : ""}`} onClick={() => { setSelectedId(p.id); if (tab === "home") setTab("assess"); }}>
+                <div className="avatar" style={{ background: `color-mix(in srgb, ${PHASE_META[a.phase].color} 18%, transparent)` }}>
                   <User size={16} color={PHASE_META[a.phase].color} />
                 </div>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--muted)" }}>{p.regions.map((r) => REGIONS.find((x) => x.id === r)?.label).join("، ")}</div>
+                <div style={{ minWidth: 0, flex: 1, textAlign: "right" }}>
+                  <div className="ellipsis" style={{ fontSize: 13.5, fontWeight: 600 }}>{p.name}</div>
+                  <div className="muted" style={{ fontSize: 11 }}>{(p.regions || []).map((r) => REGIONS.find((x) => x.id === r)?.label).join("، ")}</div>
                 </div>
+                {a.flagged && <AlertTriangle size={13} color="var(--coral)" />}
               </button>
             );
           })}
         </div>
-      </div>
+        {patients.length === 0 && (
+          <button className="btn btn-ghost btn-sm" style={{ width: "100%", marginTop: 8 }} onClick={addDemo}>افزودن بیمار نمونه</button>
+        )}
+      </aside>
 
-      <div style={{ flex: 1, minWidth: 0, width: isMobile ? "100%" : "auto" }}>
-        <div style={{ display: "flex", gap: 6, marginBottom: 16, borderBottom: "1px solid var(--line)", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          {[{ id: "assess", l: "ارزیابی و الگوریتم", icon: Activity }, { id: "program", l: "برنامهٔ ورزشی", icon: ClipboardList }, { id: "library", l: "کتابخانهٔ ورزش‌ها", icon: Dumbbell }, { id: "advice", l: "توصیه‌های عمومی", icon: Info }].map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, padding: "10px 12px", fontSize: 13,
-              fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? "var(--teal-deep)" : "var(--muted)",
-              borderBottom: tab === t.id ? "2px solid var(--teal)" : "2px solid transparent", whiteSpace: "nowrap", flexShrink: 0,
-            }}>
+      <section className="doc-main">
+        <div className="tabs">
+          {[
+            { id: "home", l: "نمای کلی", icon: Layout },
+            { id: "assess", l: "ارزیابی", icon: Activity },
+            { id: "program", l: "برنامه", icon: ClipboardList },
+            { id: "library", l: "کتابخانه", icon: Dumbbell },
+            { id: "advice", l: "توصیه‌ها", icon: Info },
+          ].map((t) => (
+            <button key={t.id} className={`tab ${tab === t.id ? "on" : ""}`} onClick={() => setTab(t.id)}>
               <t.icon size={15} /> {t.l}
             </button>
           ))}
         </div>
 
+        {tab === "home" && (
+          <DashboardTab patients={patients} allExercises={allExercises} onSelect={(id) => { setSelectedId(id); setTab("assess"); }} onAdd={() => { setEditing(null); setShowForm(true); }} />
+        )}
+
         {tab === "library" && (
           <div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-              <button onClick={() => setLibRegion("all")} style={chip(libRegion === "all")}>همه</button>
-              {REGIONS.map((r) => <button key={r.id} onClick={() => setLibRegion(r.id)} style={chip(libRegion === r.id)}>{r.label}</button>)}
+            <div className="row wrap" style={{ gap: 6, marginBottom: 14, justifyContent: "space-between" }}>
+              <div className="row wrap" style={{ gap: 6 }}>
+                <button className={`chip ${libRegion === "all" ? "on" : ""}`} onClick={() => setLibRegion("all")}>همه</button>
+                {REGIONS.map((r) => <button key={r.id} className={`chip ${libRegion === r.id ? "on" : ""}`} onClick={() => setLibRegion(r.id)}>{r.label}</button>)}
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => setShowCustom(true)}><Plus size={13} /> ورزش سفارشی</button>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill,minmax(280px,1fr))", gap: 10 }}>
-              {EXERCISES.filter((e) => libRegion === "all" || e.region === libRegion).map((e) => (
-                <LibraryCard key={e.id} ex={e} image={exerciseImages[e.id]} onImageChange={onImageChange} />
+            <div className="lib-grid">
+              {allExercises.filter((e) => libRegion === "all" || e.region === libRegion).map((e) => (
+                <LibraryCard key={e.id} ex={e} image={exerciseImages[e.id]} onImageChange={onImageChange}
+                  onDeleteCustom={e.custom ? (id) => setCustomExercises((prev) => prev.filter((x) => x.id !== id)) : null} />
               ))}
             </div>
           </div>
         )}
 
-        {tab === "advice" && (
-          <RegionAdviceTab regionAdvice={regionAdvice} onAdviceChange={onAdviceChange} />
-        )}
+        {tab === "advice" && <RegionAdviceTab regionAdvice={regionAdvice} onAdviceChange={onAdviceChange} />}
 
-        {!patient && tab !== "library" && tab !== "advice" && (
-          <EmptyState icon={Users} title="بیماری انتخاب نشده" desc="از فهرست سمت راست یک بیمار را انتخاب کنید یا یک بیمار جدید اضافه کنید." action={{ label: "افزودن بیمار جدید", onClick: () => { setEditing(null); setShowForm(true); } }} />
+        {!patient && tab !== "library" && tab !== "advice" && tab !== "home" && (
+          <EmptyState icon={Users} title="بیماری انتخاب نشده" desc="از فهرست، بیمار را انتخاب کنید یا یک بیمار جدید اضافه کنید." action={{ label: "افزودن بیمار جدید", onClick: () => { setEditing(null); setShowForm(true); } }} />
         )}
 
         {patient && tab === "assess" && (
-          <AssessTab patient={patient} onEdit={() => { setEditing(patient); setShowForm(true); }} onDelete={() => removePatient(patient.id)}
-            onUpdate={(updater) => updatePatient(patient.id, updater)} />
+          <AssessTab patient={patient} allExercises={allExercises}
+            onEdit={() => { setEditing(patient); setShowForm(true); }}
+            onDelete={() => removePatient(patient.id)}
+            onUpdate={(updater) => updatePatient(patient.id, updater)}
+            notify={notify} />
         )}
-
         {patient && tab === "program" && (
-          <ProgramTab patient={patient} onUpdate={(updater) => updatePatient(patient.id, updater)} />
+          <ProgramTab patient={patient} allExercises={allExercises} exerciseImages={exerciseImages}
+            onUpdate={(updater) => updatePatient(patient.id, updater)} notify={notify} />
         )}
-      </div>
+      </section>
 
       {showForm && <PatientFormModal initial={editing} onSave={savePatient} onClose={() => { setShowForm(false); setEditing(null); }} />}
+      {showCustom && (
+        <CustomExerciseModal
+          onClose={() => setShowCustom(false)}
+          onSave={(ex) => { setCustomExercises((p) => [...p, ex]); setShowCustom(false); notify("ورزش سفارشی افزوده شد", "ok"); }}
+        />
+      )}
     </div>
   );
 }
+
+function isoAgo(n) {
+  const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10);
+}
+
+/* ===================== پیام دوطرفه (Thread) ===================== */
+// تابع مهاجرت: یادداشت‌های قدیمی coachNote/patientNote را به آرایهٔ messages تبدیل می‌کند.
+function getMessages(patient) {
+  if (Array.isArray(patient.messages)) return patient.messages;
+  const arr = [];
+  if (patient.coachNote && patient.coachNote.trim()) {
+    arr.push({ id: uid(), role: "coach", text: patient.coachNote, ts: patient.updatedAt || Date.now(), read: true, migrated: true });
+  }
+  if (patient.patientNote && patient.patientNote.trim()) {
+    arr.push({ id: uid(), role: "patient", text: patient.patientNote, ts: patient.updatedAt || Date.now(), read: false, migrated: true });
+  }
+  return arr;
+}
+
+function MessageThread({ messages, role, draft, onDraftChange, onSend, onMarkAllRead, onClear }) {
+  const [expanded, setExpanded] = useState(false);
+  const scrollRef = useRef(null);
+  const isCoach = role === "coach";
+  useEffect(() => {
+    if (expanded && scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [expanded, messages.length]);
+  useEffect(() => {
+    if (isCoach && messages.some((m) => m.role === "patient" && !m.read)) onMarkAllRead && onMarkAllRead();
+    // علامت‌گذاری پیام‌های بیمار به‌عنوان خوانده‌شده هنگامی که پزشک thread را باز می‌کند
+    // (فقط در همان لحظهٔ mount، پس از آن پیام‌های جدید بیمار خوانده‌نشده می‌مانند تا بعداً در داشبورد دیده شوند)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded]);
+  if (messages.length === 0 && !draft) {
+    return (
+      <div className="muted" style={{ fontSize: 12.5, lineHeight: 1.8 }}>
+        هنوز گفت‌وگویی با بیمار شروع نشده است. پیام خود را بنویسید و ارسال کنید.
+      </div>
+    );
+  }
+  const send = () => {
+    const t = (draft || "").trim();
+    if (!t) return;
+    onSend(t);
+    onDraftChange("");
+  };
+  return (
+    <div>
+      {messages.length > 0 && (
+        <button className="linkish" style={{ marginBottom: 8 }} onClick={() => setExpanded((x) => !x)}>
+          {expanded ? "بستن گفت‌وگو" : `نمایش گفت‌وگو (${toFa(messages.length)} پیام)`}
+        </button>
+      )}
+      {expanded && (
+        <div ref={scrollRef} className="msg-thread" style={{ maxHeight: 260, overflowY: "auto", marginBottom: 10, padding: 8, background: "var(--paper-2)", borderRadius: 10 }}>
+          {messages.map((m) => {
+            const mine = m.role === role;
+            const other = m.role === (isCoach ? "patient" : "coach");
+            return (
+              <div key={m.id} style={{ display: "flex", justifyContent: mine ? "flex-start" : "flex-end", marginBottom: 8 }}>
+                <div className={`msg-bubble ${mine ? "mine" : "theirs"}`}>
+                  <div className="msg-meta">
+                    {m.role === "coach" ? "پزشک/درمانگر" : "بیمار"} · {new Date(m.ts).toLocaleString("fa-IR", { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}
+                  </div>
+                  <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>{m.text}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <textarea
+        className="input"
+        rows={2}
+        value={draft}
+        onChange={(e) => onDraftChange(e.target.value)}
+        placeholder={isCoach ? "پیام شما برای بیمار…" : "پیام شما برای پزشک…"}
+        onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send(); }}
+      />
+      <div className="row" style={{ gap: 8, marginTop: 8 }}>
+        <button className="btn btn-plum btn-sm" onClick={send}>ارسال پیام</button>
+        {onClear && messages.length > 0 && (
+          <button className="plain-btn muted" style={{ fontSize: 11.5 }} onClick={onClear}>پاک کردن گفت‌وگو</button>
+        )}
+        <span className="muted" style={{ fontSize: 10.5, marginInlineStart: "auto" }}>ارسال: Ctrl/⌘ + Enter</span>
+      </div>
+    </div>
+  );
+}
+
+function DashboardTab({ patients, allExercises, onSelect, onAdd }) {
+  const stats = useMemo(() => {
+    const n = patients.length;
+    const flagged = patients.filter((p) => computeAssessment(p).flagged).length;
+    const phases = { 1: 0, 2: 0, 3: 0 };
+    let adh = 0;
+    const attention = [];
+    let reflexCount = 0;
+    let bindingCount = 0;
+    let highAdhCount = 0;
+    patients.forEach((p) => {
+      const a = computeAssessment(p);
+      phases[a.phase]++;
+      adh += weekAdherence(p);
+      // رفلک: بیمارانی که نشانه‌های رفلکسی / علائم عصبی در پرونده دارند (ردفلگ یا درد بالا)
+      const hasReflex = (p.redFlags && p.redFlags.length > 0) || p.painNRS >= 7;
+      if (hasReflex) reflexCount++;
+      // بایندی: بیمارانی که عملکرد پایین یا محدودیت بالینی دارند (نیاز به بایندینگ تمرین)
+      if (p.functionScore !== undefined && p.functionScore <= 4) bindingCount++;
+      // پایبندی بالا: بیمارانی که در ۷ روز اخیر >= ۶۰٪ پایبندی دارند
+      if (weekAdherence(p) >= 60) highAdhCount++;
+      if (a.flagged) attention.push({ p, why: "علامت هشدار" });
+      else if (p.painNRS >= 7) attention.push({ p, why: "درد بالا" });
+      else if (weekAdherence(p) < 20 && (p.program || []).some((x) => x.included)) attention.push({ p, why: "پایبندی بسیار کم" });
+      const unreadFromPatient = (p.messages || []).some((m) => m.role === "patient" && !m.read);
+      if (unreadFromPatient) attention.push({ p, why: "پیام خوانده‌نشده از بیمار" });
+    });
+    return { n, flagged, phases, adh: n ? Math.round(adh / n) : 0, attention, reflexCount, bindingCount, highAdhCount };
+  }, [patients]);
+
+  return (
+    <div className="stack" style={{ gap: 16 }}>
+      <div className="kpi-grid">
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>بیماران فعال</div>
+          <div className="serif kpi-n">{toFa(stats.n)}</div>
+        </div>
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>میانگین پایبندی ۷روز</div>
+          <div className="serif kpi-n" style={{ color: "var(--teal-deep)" }}>{toFa(stats.adh)}٪</div>
+        </div>
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>دارای رفلک</div>
+          <div className="serif kpi-n" style={{ color: "var(--coral)" }}>{toFa(stats.reflexCount)}</div>
+          <div className="muted" style={{ fontSize: 10.5, marginTop: 4 }}>علائم عصبی/ردفلگ/درد ≥ ۷</div>
+        </div>
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>نیاز به بایندی</div>
+          <div className="serif kpi-n" style={{ color: "var(--amber)" }}>{toFa(stats.bindingCount)}</div>
+          <div className="muted" style={{ fontSize: 10.5, marginTop: 4 }}>عملکرد ≤ ۴ (نیاز به محدودسازی)</div>
+        </div>
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>پایبندی بالا (≥۶۰٪)</div>
+          <div className="serif kpi-n" style={{ color: "var(--sage)" }}>{toFa(stats.highAdhCount)}</div>
+        </div>
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>دارای ردفلگ</div>
+          <div className="serif kpi-n" style={{ color: "var(--coral)" }}>{toFa(stats.flagged)}</div>
+        </div>
+        <div className="card pad kpi">
+          <div className="muted" style={{ fontSize: 12 }}>توزیع فاز</div>
+          <div className="row" style={{ gap: 8, marginTop: 8 }}>
+            {[1, 2, 3].map((ph) => (
+              <div key={ph} style={{ flex: 1 }}>
+                <div style={{ height: 8, borderRadius: 99, background: "var(--paper-2)", overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${stats.n ? (stats.phases[ph] / stats.n) * 100 : 0}%`, background: PHASE_META[ph].color }} />
+                </div>
+                <div className="muted" style={{ fontSize: 10.5, marginTop: 4 }}>{PHASE_META[ph].short} {toFa(stats.phases[ph])}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="card pad">
+        <div className="row" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+          <div className="title-md"><Flag size={15} /> نیازمند توجه</div>
+          <button className="btn btn-primary btn-sm" onClick={onAdd}><Plus size={13} /> بیمار جدید</button>
+        </div>
+        {stats.attention.length === 0 && <div className="muted" style={{ fontSize: 13 }}>مورد فوری نیست. عالی.</div>}
+        <div className="stack" style={{ gap: 8 }}>
+          {stats.attention.slice(0, 8).map((a, i) => (
+            <button key={i} className="plain-btn row card pad-sm" style={{ gap: 10, width: "100%" }} onClick={() => onSelect(a.p.id)}>
+              <User size={16} color="var(--teal)" />
+              <div style={{ flex: 1, textAlign: "right" }}>
+                <div className="title-sm">{a.p.name}</div>
+                <div className="muted" style={{ fontSize: 12 }}>{a.why}</div>
+              </div>
+              <ChevronLeftish />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {patients.length > 0 && (
+        <div className="card pad">
+          <div className="title-md" style={{ marginBottom: 10 }}>بیماران</div>
+          <div className="stack" style={{ gap: 8 }}>
+            {patients.slice(0, 12).map((p) => {
+              const a = computeAssessment(p);
+              return (
+                <button key={p.id} className="plain-btn row" style={{ gap: 10, width: "100%" }} onClick={() => onSelect(p.id)}>
+                  <PhaseBadge phase={a.phase} size="sm" />
+                  <div style={{ flex: 1, textAlign: "right" }} className="title-sm">{p.name}</div>
+                  <span className="muted" style={{ fontSize: 12 }}>{toFa(weekAdherence(p))}٪</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+const ChevronLeftish = () => <ChevronRight size={16} color="var(--muted)" />;
 
 function EmptyState({ icon: Icon, title, desc, action }) {
   return (
-    <div style={{ textAlign: "center", padding: "60px 20px", background: "var(--card)", borderRadius: 16, border: "1px dashed var(--line)" }}>
+    <div className="card empty">
       <Icon size={30} color="var(--muted)" style={{ marginBottom: 10 }} />
-      <div style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 600 }}>{title}</div>
-      <div style={{ fontSize: 13.5, color: "var(--muted)", marginTop: 6, maxWidth: 340, marginInline: "auto" }}>{desc}</div>
-      {action && <button onClick={action.onClick} style={{ marginTop: 16, padding: "9px 18px", borderRadius: 10, border: "none", background: "var(--teal)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>{action.label}</button>}
+      <div className="serif" style={{ fontSize: 18 }}>{title}</div>
+      <div className="muted" style={{ fontSize: 13.5, marginTop: 6, maxWidth: 340, marginInline: "auto" }}>{desc}</div>
+      {action && <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={action.onClick}>{action.label}</button>}
     </div>
   );
 }
 
-const iconBtn = { all: "unset", cursor: "pointer", width: 32, height: 32, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", border: "1px solid var(--line)" };
-
-function AssessTab({ patient, onEdit, onDelete, onUpdate }) {
+function AssessTab({ patient, onEdit, onDelete, onUpdate, notify, allExercises }) {
   const [confirmDel, setConfirmDel] = useState(false);
+  const [coach, setCoach] = useState(patient.coachNote || "");
   const assessment = computeAssessment(patient);
-  const chartData = (patient.history || []).map((h) => ({ date: new Date(h.date).toLocaleDateString("fa-IR", { day: "numeric", month: "short" }), pain: h.pain, func: h.func }));
+  const chartData = (patient.history || []).map((h) => ({
+    date: new Date(h.date).toLocaleDateString("fa-IR", { day: "numeric", month: "short" }),
+    pain: h.pain, func: h.func,
+  }));
+  const insights = computeInsights(patient);
+
+  const regenCode = () => {
+    onUpdate((p) => ({ ...p, accessCode: genAccessCode([p]) }));
+    notify("کد جدید ساخته شد", "ok");
+  };
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 18 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+    <div className="stack" style={{ gap: 16 }}>
+      <div className="card pad">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <div style={{ fontFamily: "Fraunces, serif", fontSize: 22, fontWeight: 600 }}>{patient.name}</div>
-            <div style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 2 }}>
-              {patient.age ? `${toFa(patient.age)} سال · ` : ""}{patient.regions.map((r) => REGIONS.find((x) => x.id === r)?.label).join("، ")}
+            <div className="serif" style={{ fontSize: 22 }}>{patient.name}</div>
+            <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+              {patient.age ? `${toFa(patient.age)} سال · ` : ""}{(patient.regions || []).map((r) => REGIONS.find((x) => x.id === r)?.label).join("، ")}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+            <div className="row wrap" style={{ gap: 6, marginTop: 8 }}>
               <KeyRound size={13} color="var(--muted)" />
-              <span style={{ fontSize: 11.5, color: "var(--muted)" }}>کد دسترسی بیمار:</span>
-              <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: 13.5, letterSpacing: 2, color: "var(--teal-deep)", background: "var(--paper)", padding: "2px 9px", borderRadius: 7, fontWeight: 700 }}>{patient.accessCode}</span>
-              <button onClick={() => onUpdate((p) => ({ ...p, accessCode: String(Math.floor(1000 + Math.random() * 9000)) }))} style={{ all: "unset", cursor: "pointer", fontSize: 11, color: "var(--muted)", textDecoration: "underline" }}>تولید کد جدید</button>
+              <span className="muted" style={{ fontSize: 11.5 }}>کد دسترسی:</span>
+              <span className="code-pill">{patient.accessCode}</span>
+              <button className="linkish" onClick={async () => { if (await copyText(patient.accessCode)) notify("کد کپی شد", "ok"); }}><Copy size={12} /> کپی</button>
+              <button className="linkish" onClick={regenCode}>تولید کد جدید</button>
             </div>
+            {patient.goal && <div className="muted" style={{ fontSize: 12.5, marginTop: 8 }}><Target size={12} /> هدف: {patient.goal}</div>}
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={onEdit} style={iconBtn}><Edit3 size={15} /></button>
-            <button onClick={() => (confirmDel ? onDelete() : setConfirmDel(true))} style={{ ...iconBtn, color: confirmDel ? "#fff" : "var(--coral)", background: confirmDel ? "var(--coral)" : "transparent" }}>
+          <div className="row" style={{ gap: 6 }}>
+            <button className="icon-btn" onClick={onEdit}><Edit3 size={15} /></button>
+            <button className="icon-btn" style={{ color: confirmDel ? "#fff" : "var(--coral)", background: confirmDel ? "var(--coral)" : "transparent" }}
+              onClick={() => (confirmDel ? onDelete() : setConfirmDel(true))}>
               {confirmDel ? "مطمئنید؟" : <Trash2 size={15} />}
             </button>
           </div>
         </div>
 
-        {assessment.reason.includes("هشدار") && (
-          <div style={{ marginTop: 12, display: "flex", gap: 8, background: "#D9645A14", color: "var(--coral)", padding: "10px 12px", borderRadius: 10, fontSize: 13 }}>
-            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 1 }} /> {assessment.reason}
-          </div>
+        {assessment.flagged && (
+          <div className="caution" style={{ marginTop: 12 }}><AlertTriangle size={16} /> {assessment.reason}</div>
         )}
 
-        <div style={{ display: "flex", gap: 26, marginTop: 18, flexWrap: "wrap", alignItems: "center" }}>
+        <div className="row wrap" style={{ gap: 26, marginTop: 18, alignItems: "center" }}>
           <SemiGauge value={patient.painNRS} label="شدت درد (NRS)" />
           <SemiGauge value={patient.functionScore} invert label="سطح عملکرد" />
           <div style={{ flex: 1, minWidth: 180 }}>
-            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>فاز پیشنهادی الگوریتم</div>
+            <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>فاز پیشنهادی الگوریتم</div>
             <PhaseBadge phase={assessment.phase} />
-            {!assessment.reason.includes("هشدار") && <div style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 8, lineHeight: 1.7 }}>{assessment.reason}</div>}
+            {!assessment.flagged && <div className="muted" style={{ fontSize: 12.5, marginTop: 8, lineHeight: 1.7 }}>{assessment.reason}</div>}
+            <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>پایبندی ۷روز: {toFa(weekAdherence(patient))}٪ · زنجیره: {toFa(computeStreak(patient))} روز</div>
           </div>
         </div>
       </div>
 
-      {chartData.length > 1 && (
-        <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 18 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5, fontWeight: 600, marginBottom: 10, color: "var(--ink)" }}>
-            <TrendingUp size={15} /> روند درد و عملکرد
+      {(() => {
+        const msgs = getMessages(patient);
+        const unreadFromPatient = msgs.filter((m) => m.role === "patient" && !m.read).length;
+        if (msgs.length === 0) return null;
+        return (
+          <div className="card pad" style={{ borderColor: unreadFromPatient > 0 ? "var(--coral)" : "var(--line)" }}>
+            <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
+              <div className="title-sm row" style={{ gap: 6 }}><Message size={14} /> گفت‌وگو با بیمار</div>
+              {unreadFromPatient > 0 && <span className="tag-teal" style={{ background: "color-mix(in srgb, var(--coral) 18%, transparent)", color: "var(--coral)" }}>{toFa(unreadFromPatient)} پیام خوانده‌نشده</span>}
+            </div>
+            <div className="msg-thread" style={{ maxHeight: 260, overflowY: "auto", padding: 8, background: "var(--paper-2)", borderRadius: 10 }}>
+              {msgs.map((m) => {
+                const mine = m.role === "coach";
+                return (
+                  <div key={m.id} style={{ display: "flex", justifyContent: mine ? "flex-start" : "flex-end", marginBottom: 8 }}>
+                    <div className={`msg-bubble ${mine ? "mine" : "theirs"}`}>
+                      <div className="msg-meta">
+                        {m.role === "coach" ? "پزشک" : "بیمار"} · {new Date(m.ts).toLocaleString("fa-IR", { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}
+                      </div>
+                      <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>{m.text}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button className="btn btn-ghost btn-sm" style={{ marginTop: 8 }} onClick={() => onUpdate((p) => ({ ...p, messages: (p.messages || []).map((m) => m.role === "patient" ? { ...m, read: true } : m) }))}>
+              علامت همه به‌عنوان خوانده‌شده
+            </button>
           </div>
-          <MiniLineChart
-            data={chartData}
-            height={180}
-            series={[
-              { key: "pain", color: "var(--coral)", label: "درد" },
-              { key: "func", color: "var(--sage)", label: "عملکرد" },
-            ]}
-          />
+        );
+      })()}
+
+      {insights.length > 0 && (
+        <div className="stack" style={{ gap: 8 }}>
+          {insights.map((ins, i) => (
+            <div key={i} className={`insight ${ins.type}`}>{ins.type === "good" ? <TrendingDown size={14} /> : <AlertTriangle size={14} />} {ins.text}</div>
+          ))}
         </div>
       )}
 
-      <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 18 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 10 }}>به‌روزرسانی سریع وضعیت</div>
-        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+      {chartData.length > 1 && (
+        <div className="card pad">
+          <div className="title-sm row" style={{ gap: 6, marginBottom: 10 }}><TrendingUp size={15} /> روند درد و عملکرد</div>
+          <MiniLineChart data={chartData} height={180} series={[
+            { key: "pain", color: "var(--coral)", label: "درد" },
+            { key: "func", color: "var(--sage)", label: "عملکرد" },
+          ]} />
+        </div>
+      )}
+
+      <div className="card pad">
+        <div className="title-sm" style={{ marginBottom: 10 }}>به‌روزرسانی سریع وضعیت</div>
+        <div className="row wrap" style={{ gap: 20 }}>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <label style={{ fontSize: 12, color: "var(--muted)" }}>درد (NRS): {toFa(patient.painNRS)}</label>
+            <label className="lbl">درد (NRS): {toFa(patient.painNRS)}</label>
             <input type="range" min="0" max="10" value={patient.painNRS} onChange={(e) => onUpdate((p) => ({ ...p, painNRS: +e.target.value }))} style={{ width: "100%", accentColor: "var(--coral)" }} />
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <label style={{ fontSize: 12, color: "var(--muted)" }}>عملکرد: {toFa(patient.functionScore)}</label>
+            <label className="lbl">عملکرد: {toFa(patient.functionScore)}</label>
             <input type="range" min="0" max="10" value={patient.functionScore} onChange={(e) => onUpdate((p) => ({ ...p, functionScore: +e.target.value }))} style={{ width: "100%", accentColor: "var(--sage)" }} />
           </div>
         </div>
         <button
+          className="btn btn-primary"
+          style={{ marginTop: 14 }}
           onClick={() => onUpdate((p) => {
             const hist = [...(p.history || [])];
             const idx = hist.findIndex((h) => h.date === todayStr());
             const entry = { date: todayStr(), pain: p.painNRS, func: p.functionScore };
             if (idx >= 0) hist[idx] = entry; else hist.push(entry);
-            return { ...p, history: hist, program: buildProgram(p) };
+            return { ...p, history: hist, program: buildProgram(p, allExercises) };
           })}
-          style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 10, border: "none", background: "var(--teal)", color: "#fff", fontWeight: 600, fontSize: 13.5, cursor: "pointer" }}
         >
           <Sparkles size={15} /> ثبت وضعیت امروز و به‌روزرسانی برنامه
         </button>
+      </div>
+
+      <div className="card pad">
+        <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
+          <div className="title-sm row" style={{ gap: 6 }}><Message size={14} /> گفت‌وگوی دوطرفه با بیمار</div>
+          {(() => {
+            const msgs = getMessages(patient);
+            const unreadFromPatient = msgs.filter((m) => m.role === "patient" && !m.read).length;
+            return unreadFromPatient > 0 ? (
+              <span className="tag-teal" style={{ background: "color-mix(in srgb, var(--coral) 18%, transparent)", color: "var(--coral)" }}>{toFa(unreadFromPatient)} پیام خوانده‌نشده</span>
+            ) : null;
+          })()}
+        </div>
+        <MessageThread
+          messages={getMessages(patient)}
+          role="coach"
+          draft={coach}
+          onDraftChange={setCoach}
+          onSend={(text) => {
+            onUpdate((p) => {
+              const msgs = getMessages(p);
+              return { ...p, messages: [...msgs, { id: uid(), role: "coach", text, ts: Date.now(), read: true }] };
+            });
+            notify("پیام ارسال شد", "ok");
+          }}
+          onMarkAllRead={() => {
+            onUpdate((p) => ({ ...p, messages: (p.messages || []).map((m) => ({ ...m, read: true })) }));
+          }}
+          onClear={() => {
+            onUpdate((p) => ({ ...p, messages: [] }));
+            setCoach("");
+            notify("گفت‌وگو پاک شد");
+          }}
+        />
+      </div>
+
+      <div className="card pad">
+        <div className="title-sm" style={{ marginBottom: 8 }}>تقویم پایبندی</div>
+        <Heatmap adherence={patient.adherence} />
       </div>
     </div>
   );
 }
 
-function ProgramTab({ patient, onUpdate }) {
+function printProgram(patient, allExercises, images) {
+  const assessment = computeAssessment(patient);
+  const items = (patient.program || []).filter((pi) => pi.included).map((pi) => findEx(pi.exerciseId, allExercises)).filter(Boolean);
+  const w = window.open("", "_blank");
+  if (!w) return;
+  w.document.write(`<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"/><title>برنامه ${esc(patient.name)}</title>
+    <style>body{font-family:Tahoma,sans-serif;padding:24px;color:#16232E} h1{font-size:20px} .ex{border:1px solid #ddd;border-radius:10px;padding:12px;margin:10px 0} .muted{color:#667} .dose{background:#f4f7f5;padding:4px 8px;border-radius:6px;display:inline-block}</style></head><body>
+    <h1>توان‌یار — برنامهٔ ورزشی ${esc(patient.name)}</h1>
+    <div class="muted">${esc(faDate())} · فاز ${assessment.phase} · کد دسترسی ${esc(patient.accessCode)}</div>
+    ${patient.goal ? `<p>هدف: ${esc(patient.goal)}</p>` : ""}
+    ${items.map((ex) => `<div class="ex"><b>${esc(ex.name)}</b><div>${esc(ex.cues)}</div><div class="dose">${esc(DOSAGE[ex.category]?.[assessment.phase] || "")}</div>${ex.caution ? `<div style="color:#c45c52">⚠ ${esc(ex.caution)}</div>` : ""}</div>`).join("")}
+    <p class="muted" style="font-size:11px">این برنامه کمک‌تصمیم است و جایگزین قضاوت پزشک نیست.</p>
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 250);
+}
+
+function ProgramTab({ patient, onUpdate, allExercises, exerciseImages, notify }) {
+  const [showAdd, setShowAdd] = useState(false);
   const assessment = computeAssessment(patient);
   const program = patient.program && patient.program.length ? patient.program : [];
-  const regenerate = () => onUpdate((p) => ({ ...p, program: buildProgram(p) }));
+  const regenerate = () => { onUpdate((p) => ({ ...p, program: buildProgram(p, allExercises) })); notify("برنامه بازسازی شد", "ok"); };
   const toggle = (exId) => onUpdate((p) => ({ ...p, program: p.program.map((pi) => (pi.exerciseId === exId ? { ...pi, included: !pi.included } : pi)) }));
-
+  const addEx = (id) => onUpdate((p) => {
+    const prog = [...(p.program || [])];
+    if (prog.some((x) => x.exerciseId === id)) return p;
+    return { ...p, program: [...prog, { exerciseId: id, included: true }] };
+  });
   const grouped = REGIONS.map((r) => ({
     region: r,
-    items: program.filter((pi) => EXERCISES.find((e) => e.id === pi.exerciseId)?.region === r.id),
+    items: program.filter((pi) => findEx(pi.exerciseId, allExercises)?.region === r.id),
   })).filter((g) => g.items.length);
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="stack" style={{ gap: 16 }}>
+      <div className="row wrap" style={{ justifyContent: "space-between", gap: 10 }}>
+        <div className="row wrap" style={{ gap: 10 }}>
           <PhaseBadge phase={assessment.phase} />
-          <span style={{ fontSize: 12.5, color: "var(--muted)" }}>{program.filter((p) => p.included).length} ورزش فعال از {program.length}</span>
+          <span className="muted" style={{ fontSize: 12.5 }}>{toFa(program.filter((p) => p.included).length)} ورزش فعال از {toFa(program.length)}</span>
         </div>
-        <button onClick={regenerate} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "1px solid var(--teal)", background: "#fff", color: "var(--teal-deep)", fontWeight: 600, fontSize: 12.5, cursor: "pointer" }}>
-          <Sparkles size={14} /> ساخت/به‌روزرسانی برنامه بر اساس ارزیابی
-        </button>
+        <div className="row wrap" style={{ gap: 6 }}>
+          <button className="btn btn-ghost btn-sm" onClick={() => setShowAdd(true)}><Plus size={13} /> افزودن ورزش</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => printProgram(patient, allExercises, exerciseImages)}><Printer size={13} /> چاپ</button>
+          <button className="btn btn-ghost btn-sm" onClick={regenerate}><Sparkles size={13} /> ساخت بر اساس ارزیابی</button>
+        </div>
       </div>
-
       {program.length === 0 && (
-        <EmptyState icon={ClipboardList} title="هنوز برنامه‌ای ساخته نشده" desc="روی «ساخت برنامه بر اساس ارزیابی» بزنید تا الگوریتم با توجه به درد، عملکرد و ناحیهٔ درگیر، ورزش‌های مناسب را پیشنهاد دهد." action={{ label: "ساخت برنامه", onClick: regenerate }} />
+        <EmptyState icon={ClipboardList} title="هنوز برنامه‌ای ساخته نشده" desc="الگوریتم با توجه به درد، عملکرد و ناحیه، ورزش‌ها را پیشنهاد می‌دهد." action={{ label: "ساخت برنامه", onClick: regenerate }} />
       )}
-
       {grouped.map((g) => (
         <div key={g.region.id}>
-          <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--muted)", marginBottom: 8 }}>{g.region.label}</div>
-          <div style={{ display: "grid", gap: 8 }}>
+          <div className="muted" style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>{g.region.label}</div>
+          <div className="stack" style={{ gap: 8 }}>
             {g.items.map((pi) => {
-              const ex = EXERCISES.find((e) => e.id === pi.exerciseId);
-              return <ProgramRow key={pi.exerciseId} ex={ex} phase={assessment.phase} included={pi.included} onToggle={() => toggle(pi.exerciseId)} />;
+              const ex = findEx(pi.exerciseId, allExercises);
+              return <ProgramRow key={pi.exerciseId} ex={ex} phase={assessment.phase} included={pi.included} onToggle={() => toggle(pi.exerciseId)} image={exerciseImages[pi.exerciseId]} />;
             })}
           </div>
         </div>
       ))}
+      {showAdd && (
+        <AddFromLibraryModal
+          allExercises={allExercises}
+          existingIds={program.map((p) => p.exerciseId)}
+          onAdd={addEx}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
     </div>
   );
 }
@@ -1211,84 +1790,134 @@ function RegionAdviceTab({ regionAdvice, onAdviceChange }) {
   const [activeRegion, setActiveRegion] = useState(REGIONS[0].id);
   const [draft, setDraft] = useState(regionAdvice[activeRegion] || "");
   const [savedTick, setSavedTick] = useState(false);
-
-  useEffect(() => { setDraft(regionAdvice[activeRegion] || ""); }, [activeRegion]);
-
+  useEffect(() => { setDraft(regionAdvice[activeRegion] || ""); }, [activeRegion, regionAdvice]);
   const save = () => {
     onAdviceChange(activeRegion, draft);
     setSavedTick(true);
     setTimeout(() => setSavedTick(false), 1300);
   };
-
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 18 }}>
-        <div style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 600, marginBottom: 4 }}>توصیه‌های عمومی برای هر ناحیهٔ بدن</div>
-        <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 14, lineHeight: 1.8 }}>
-          برای هر ناحیه یک متن راهنمای عمومی بنویسید (مثلاً توصیه‌های وضعیت بدنی، فعالیت‌های روزمره یا هشدارها برای کمردرد). این متن به تمام بیمارانی که آن ناحیه را دارند نمایش داده می‌شود.
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-          {REGIONS.map((r) => (
-            <button key={r.id} onClick={() => setActiveRegion(r.id)} style={chip(activeRegion === r.id)}>
-              {r.label}
-              {regionAdvice[r.id] ? <span style={{ marginInlineStart: 5, opacity: 0.7 }}>●</span> : null}
-            </button>
-          ))}
-        </div>
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          rows={8}
-          placeholder={`مثلاً برای کمردرد: از نشستن طولانی‌مدت بدون تغییر وضعیت پرهیز کنید، هر ۳۰ دقیقه بایستید و کمی راه بروید، هنگام بلند کردن اجسام زانو را خم کنید نه کمر را...`}
-          style={{ ...inputStyle, resize: "vertical", lineHeight: 1.9 }}
-        />
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
-          <button onClick={save} style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: "var(--teal)", color: "#fff", fontWeight: 600, fontSize: 13.5, cursor: "pointer" }}>
-            ذخیرهٔ توصیه برای «{REGIONS.find((r) => r.id === activeRegion)?.label}»
+    <div className="card pad">
+      <div className="serif" style={{ fontSize: 18, marginBottom: 4 }}>توصیه‌های عمومی برای هر ناحیه</div>
+      <div className="muted" style={{ fontSize: 12.5, marginBottom: 14, lineHeight: 1.8 }}>
+        متن راهنما برای تمام بیمارانی که آن ناحیه را دارند نمایش داده می‌شود.
+      </div>
+      <div className="row wrap" style={{ gap: 6, marginBottom: 14 }}>
+        {REGIONS.map((r) => (
+          <button key={r.id} className={`chip ${activeRegion === r.id ? "on" : ""}`} onClick={() => setActiveRegion(r.id)}>
+            {r.label}
+            {regionAdvice[r.id] ? <span style={{ marginInlineStart: 5, opacity: 0.7 }}>●</span> : null}
           </button>
-          {savedTick && <span style={{ fontSize: 12, color: "var(--sage)" }}>ذخیره شد ✓</span>}
-        </div>
+        ))}
+      </div>
+      <textarea className="input" value={draft} onChange={(e) => setDraft(e.target.value)} rows={8}
+        placeholder="مثلاً برای کمردرد: از نشستن طولانی بدون تغییر وضعیت پرهیز کنید…" />
+      <div className="row" style={{ gap: 12, marginTop: 12 }}>
+        <button className="btn btn-primary" onClick={save}>ذخیرهٔ توصیه برای «{REGIONS.find((r) => r.id === activeRegion)?.label}»</button>
+        {savedTick && <span style={{ fontSize: 12, color: "var(--sage)" }}>ذخیره شد ✓</span>}
       </div>
     </div>
   );
 }
 
-/* --------------------------------- ورود و پورتال بیمار --------------------------------- */
-
+/* ===================== پورتال بیمار ===================== */
 function PatientLockScreen({ patients, onUnlock }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
-  const submit = () => {
-    const found = patients.find((p) => p.accessCode === code.trim());
+  const submit = (c) => {
+    const v = (c ?? code).trim();
+    const found = patients.find((p) => p.accessCode === v);
     if (found) { onUnlock(found.id); setError(""); }
     else setError("کد نامعتبر است. کد ۴ رقمی را از پزشک خود بگیرید.");
   };
+  const push = (d) => {
+    const next = (code + d).slice(0, 4);
+    setCode(next);
+    if (next.length === 4) setTimeout(() => submit(next), 80);
+  };
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "ورود"];
   return (
-    <div style={{ maxWidth: 380, margin: "50px auto", textAlign: "center", background: "var(--card)", border: "1px solid var(--line)", borderRadius: 18, padding: 28 }}>
-      <div style={{ width: 52, height: 52, borderRadius: 14, background: "var(--paper)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-        <Lock size={22} color="var(--teal)" />
+    <div className="lock-card fade-in">
+      <div className="lock-icon"><Lock size={22} color="var(--teal)" /></div>
+      <div className="serif" style={{ fontSize: 22 }}>ورود بیمار</div>
+      <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>کد دسترسی ۴ رقمی پزشک را وارد کنید</div>
+      <div className="pin-dots">
+        {[0, 1, 2, 3].map((i) => <i key={i} className={code.length > i ? "on" : ""} />)}
       </div>
-      <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 600 }}>ورود بیمار</div>
-      <div style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 6 }}>کد دسترسی ۴ رقمی که پزشک به شما داده را وارد کنید.</div>
-      <input
-        value={code}
-        onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
-        onKeyDown={(e) => e.key === "Enter" && submit()}
-        placeholder="----"
-        style={{ ...inputStyle, textAlign: "center", fontSize: 22, letterSpacing: 8, fontFamily: "IBM Plex Mono, monospace", marginTop: 16 }}
-      />
-      {error && <div style={{ color: "var(--coral)", fontSize: 12, marginTop: 8 }}>{error}</div>}
-      <button onClick={submit} style={{ marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: "none", background: "var(--teal)", color: "#fff", fontWeight: 700, cursor: "pointer" }}>ورود</button>
-      <div style={{ marginTop: 14, fontSize: 10.5, color: "var(--muted)", lineHeight: 1.7 }}>
-        این کد فقط یک قفل سادهٔ نمایشی است، نه رمزنگاری واقعی. برای دادهٔ بالینی حساسِ واقعی به یک سامانهٔ احراز هویت معتبر (سرور و دیتابیس اختصاصی) نیاز است.
+      {error && <div className="danger-text" style={{ fontSize: 12, marginTop: 8 }}>{error}</div>}
+      <div className="pin-pad">
+        {keys.map((k) => (
+          <button key={k} className={`pin-key ${k === "ورود" ? "go" : ""}`}
+            onClick={() => {
+              if (k === "←") setCode((c) => c.slice(0, -1));
+              else if (k === "ورود") submit();
+              else push(k);
+            }}>{k === "ورود" ? "OK" : k}</button>
+        ))}
+      </div>
+      <div className="muted" style={{ marginTop: 14, fontSize: 10.5, lineHeight: 1.7 }}>
+        این کد یک قفل سادهٔ نمایشی است، نه احراز هویت بیمارستانی.
       </div>
     </div>
   );
 }
 
-function PatientPortal({ patient, setPatients, onLock, exerciseImages, regionAdvice }) {
+function SessionOverlay({ items, phase, images, onLog, onClose }) {
+  const [idx, setIdx] = useState(0);
+  const [before, setBefore] = useState(4);
+  const [after, setAfter] = useState(3);
+  const [stage, setStage] = useState("do");
+  const ex = items[idx];
+  if (!ex) return null;
+  const image = images[ex.id];
+  const next = () => {
+    onLog(ex.id, before, after);
+    if (idx + 1 >= items.length) onClose(true);
+    else { setIdx(idx + 1); setStage("do"); setBefore(after); setAfter(Math.max(0, after - 1)); }
+  };
+  return (
+    <div className="session-back">
+      <div className="session-bar">
+        <div className="muted" style={{ color: "#fff", fontSize: 12 }}>{toFa(idx + 1)} از {toFa(items.length)}</div>
+        <button className="plain-btn" style={{ color: "#fff" }} onClick={() => onClose(false)}><X size={18} /></button>
+      </div>
+      <div className="session-track"><div style={{ width: `${((idx + (stage === "log" ? 0.5 : 0)) / items.length) * 100}%` }} /></div>
+      <div className="session-body fade-in">
+        <div className="session-fig">
+          {image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={160} />}
+        </div>
+        <div className="serif" style={{ fontSize: 22, color: "#fff", marginTop: 8 }}>{ex.name}</div>
+        <div style={{ color: "#ffffffcc", lineHeight: 1.9, marginTop: 8, fontSize: 14.5 }}>{ex.cues}</div>
+        <div className="dose" style={{ marginTop: 12, background: "#ffffff22", color: "#fff" }}>{DOSAGE[ex.category]?.[phase]}</div>
+        {ex.caution && <div style={{ color: "#ffd0cb", marginTop: 8, fontSize: 13 }}>⚠ {ex.caution}</div>}
+        <HoldTimer seconds={HOLD_SEC[ex.category]?.[phase] || 0} />
+        {stage === "do" && (
+          <button className="btn btn-primary" style={{ width: "100%", marginTop: 18, background: "#fff", color: "var(--teal-deep)" }} onClick={() => setStage("log")}>
+            انجام شد — ثبت درد
+          </button>
+        )}
+        {stage === "log" && (
+          <div className="card pad" style={{ marginTop: 14 }}>
+            <div className="lbl">درد قبل: {toFa(before)}</div>
+            <input type="range" min="0" max="10" value={before} onChange={(e) => setBefore(+e.target.value)} style={{ width: "100%", accentColor: "var(--coral)" }} />
+            <div className="lbl">درد بعد: {toFa(after)}</div>
+            <input type="range" min="0" max="10" value={after} onChange={(e) => setAfter(+e.target.value)} style={{ width: "100%", accentColor: "var(--sage)" }} />
+            <button className="btn btn-primary" style={{ width: "100%", marginTop: 10 }} onClick={next}>
+              {idx + 1 >= items.length ? "پایان جلسه" : "حرکت بعدی"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PatientPortal({ patient, setPatients, onLock, exerciseImages, regionAdvice, allExercises }) {
   const assessment = computeAssessment(patient);
-  const included = (patient.program || []).filter((pi) => pi.included);
+  const included = (patient.program || []).filter((pi) => pi.included).map((pi) => findEx(pi.exerciseId, allExercises)).filter(Boolean);
+  const [session, setSession] = useState(false);
+  const [note, setNote] = useState(patient.patientNote || "");
+  const [celebrate, setCelebrate] = useState(false);
 
   const logExercise = (exId, before, after) => {
     setPatients((prev) => prev.map((p) => {
@@ -1302,56 +1931,82 @@ function PatientPortal({ patient, setPatients, onLock, exerciseImages, regionAdv
     }));
   };
 
-  const last7 = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().slice(0, 10); });
-  const doneDays = new Set((patient.adherence || []).filter((a) => last7.includes(a.date)).map((a) => a.date)).size;
-  const adherencePct = Math.round((doneDays / 7) * 100);
   const streak = computeStreak(patient);
   const doneToday = new Set((patient.adherence || []).filter((a) => a.date === todayStr()).map((a) => a.exerciseId));
-  const doneTodayCount = included.filter((pi) => doneToday.has(pi.exerciseId)).length;
+  const doneTodayCount = included.filter((ex) => doneToday.has(ex.id)).length;
+  const allDone = included.length > 0 && doneTodayCount === included.length;
   const advices = (patient.regions || []).map((r) => ({ region: REGIONS.find((x) => x.id === r), text: regionAdvice[r] })).filter((a) => a.region && a.text);
+  const insights = computeInsights(patient);
+  const quote = MOTIVATION[new Date().getDate() % MOTIVATION.length];
+
+  useEffect(() => {
+    if (allDone) setCelebrate(true);
+  }, [allDone]);
 
   return (
-    <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px" }} className="fade-in">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-        <button onClick={onLock} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--muted)" }}>
-          <LogOut size={13} /> خروج
-        </button>
+    <div className="portal fade-in">
+      {celebrate && allDone && (
+        <div className="confetti" aria-hidden="true">
+          {Array.from({ length: 18 }).map((_, i) => <i key={i} style={{ left: `${(i * 53) % 100}%`, animationDelay: `${i * 0.08}s`, background: i % 3 === 0 ? "var(--gold)" : i % 3 === 1 ? "var(--teal)" : "var(--coral)" }} />)}
+        </div>
+      )}
+      <div className="row" style={{ justifyContent: "flex-end", marginBottom: 8 }}>
+        <button className="plain-btn row muted" style={{ gap: 5, fontSize: 12 }} onClick={onLock}><LogOut size={13} /> خروج</button>
       </div>
 
-      <div style={{
-        background: "linear-gradient(135deg, var(--teal), var(--teal-deep) 65%, var(--plum-deep))",
-        borderRadius: 20, padding: 22, color: "#fff", marginBottom: 16, position: "relative", overflow: "hidden",
-      }}>
-        <div style={{ position: "absolute", inset: 0, opacity: 0.5, background: "radial-gradient(circle at 88% -10%, #ffffff30, transparent 45%), radial-gradient(circle at 0% 120%, #ffffff22, transparent 40%)" }} />
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+      <div className="hero">
+        <div className="hero-glow" />
+        <div className="row wrap" style={{ position: "relative", justifyContent: "space-between", gap: 14 }}>
           <div style={{ flex: 1, minWidth: 180 }}>
             <div style={{ fontSize: 13, opacity: 0.85 }}>{faDate()}</div>
-            <div style={{ fontFamily: "Fraunces, serif", fontSize: 25, fontWeight: 700, marginTop: 4 }}>سلام {patient.name} 👋</div>
+            <div className="serif" style={{ fontSize: 25, fontWeight: 700, marginTop: 4 }}>سلام {patient.name} 👋</div>
             <div style={{ fontSize: 13, opacity: 0.92, marginTop: 6 }}>امروز {toFa(doneTodayCount)} از {toFa(included.length)} حرکت را انجام داده‌اید</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <div className="row wrap" style={{ gap: 8, marginTop: 12 }}>
               <StreakBadge streak={streak} />
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#ffffff26", borderRadius: 999, padding: "5px 12px", fontSize: 12.5, fontWeight: 700 }}>
-                {toFa(adherencePct)}٪ پایبندی ۷ روز اخیر
-              </span>
+              <span className="pill-light">{toFa(weekAdherence(patient))}٪ پایبندی ۷ روز</span>
             </div>
+            {patient.goal && <div style={{ marginTop: 10, fontSize: 12.5, opacity: 0.9 }}>🎯 {patient.goal}</div>}
           </div>
           {included.length > 0 && <ProgressRing value={doneTodayCount} total={included.length} />}
         </div>
       </div>
 
+      <div className="quote">{quote}</div>
+
+      {(() => {
+        const msgs = getMessages(patient);
+        const lastCoachMsg = [...msgs].reverse().find((m) => m.role === "coach");
+        return lastCoachMsg ? (
+          <div className="coach-note">
+            <div className="title-sm" style={{ color: "var(--teal-deep)", marginBottom: 4 }}><Stethoscope size={14} /> آخرین پیام پزشک</div>
+            <div style={{ lineHeight: 1.9 }}>{lastCoachMsg.text}</div>
+            <div className="muted" style={{ fontSize: 10.5, marginTop: 6 }}>{new Date(lastCoachMsg.ts).toLocaleString("fa-IR", { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}</div>
+          </div>
+        ) : null;
+      })()}
+
+      {allDone && (
+        <div className="insight good">آفرین — برنامهٔ امروز کامل شد. فردا همین ساعت برگردید.</div>
+      )}
+
       {included.length === 0 && <EmptyState icon={ClipboardList} title="برنامه‌ای تنظیم نشده" desc="از پزشک خود بخواهید برنامهٔ ورزشی شما را تنظیم کند." />}
 
-      <div style={{ display: "grid", gap: 12 }}>
-        {included.map((pi) => {
-          const ex = EXERCISES.find((e) => e.id === pi.exerciseId);
-          const done = (patient.adherence || []).some((a) => a.date === todayStr() && a.exerciseId === ex.id);
-          return <PortalCard key={ex.id} ex={ex} phase={assessment.phase} done={done} onLog={(b, a) => logExercise(ex.id, b, a)} image={exerciseImages[ex.id]} />;
-        })}
+      {included.length > 0 && !allDone && (
+        <button className="btn btn-primary" style={{ width: "100%", marginBottom: 12 }} onClick={() => setSession(true)}>
+          <Play size={15} /> شروع جلسهٔ امروز
+        </button>
+      )}
+
+      <div className="stack" style={{ gap: 12 }}>
+        {included.map((ex) => (
+          <PortalCard key={ex.id} ex={ex} phase={assessment.phase} done={doneToday.has(ex.id)}
+            onLog={(b, a) => logExercise(ex.id, b, a)} image={exerciseImages[ex.id]} />
+        ))}
       </div>
 
       {(patient.history || []).length > 1 && (
-        <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 16, padding: 18, marginTop: 16 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 10 }}>روند درد شما</div>
+        <div className="card pad" style={{ marginTop: 16 }}>
+          <div className="title-sm" style={{ marginBottom: 10 }}>روند درد شما</div>
           <MiniLineChart
             data={patient.history.map((h) => ({ date: new Date(h.date).toLocaleDateString("fa-IR", { day: "numeric", month: "short" }), pain: h.pain }))}
             height={140}
@@ -1360,61 +2015,96 @@ function PatientPortal({ patient, setPatients, onLock, exerciseImages, regionAdv
         </div>
       )}
 
+      <div className="card pad" style={{ marginTop: 16 }}>
+        <div className="title-sm" style={{ marginBottom: 8 }}><Calendar size={14} /> پایبندی شما</div>
+        <Heatmap adherence={patient.adherence} />
+      </div>
+
+      {insights.length > 0 && (
+        <div className="stack" style={{ gap: 8, marginTop: 16 }}>
+          {insights.map((ins, i) => (
+            <div key={i} className={`insight ${ins.type}`}>{ins.text}</div>
+          ))}
+        </div>
+      )}
+
       {advices.length > 0 && (
-        <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: 6 }}>
-            <Info size={15} color="var(--teal-deep)" /> توصیه‌های عمومی برای شما
-          </div>
+        <div style={{ marginTop: 16 }} className="stack" >
+          <div className="title-sm row" style={{ gap: 6 }}><Info size={15} color="var(--teal-deep)" /> توصیه‌های عمومی</div>
           {advices.map((a) => (
-            <div key={a.region.id} style={{ background: "var(--teal-light)", border: "1px solid #2C7A7B33", borderRadius: 16, padding: 16 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--teal-deep)", marginBottom: 6 }}>{a.region.label}</div>
-              <div style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 2, whiteSpace: "pre-wrap" }}>{a.text}</div>
+            <div key={a.region.id} className="advice-box">
+              <div className="title-sm" style={{ color: "var(--teal-deep)", marginBottom: 6 }}>{a.region.label}</div>
+              <div style={{ fontSize: 13.5, lineHeight: 2, whiteSpace: "pre-wrap" }}>{a.text}</div>
             </div>
           ))}
         </div>
+      )}
+
+      <div className="card pad" style={{ marginTop: 16 }}>
+        <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
+          <div className="title-sm row" style={{ gap: 6 }}><Message size={14} /> گفت‌وگو با پزشک</div>
+          {(() => {
+            const unreadFromCoach = getMessages(patient).filter((m) => m.role === "coach" && !m.read).length;
+            return unreadFromCoach > 0 ? (
+              <span className="tag-teal" style={{ background: "color-mix(in srgb, var(--teal) 18%, transparent)" }}>{toFa(unreadFromCoach)} پیام جدید از پزشک</span>
+            ) : null;
+          })()}
+        </div>
+        <MessageThread
+          messages={getMessages(patient)}
+          role="patient"
+          draft={note}
+          onDraftChange={setNote}
+          onSend={(text) => {
+            setPatients((prev) => prev.map((p) => {
+              if (p.id !== patient.id) return p;
+              const msgs = getMessages(p);
+              return { ...p, messages: [...msgs, { id: uid(), role: "patient", text, ts: Date.now(), read: true }] };
+            }));
+            setNote("");
+          }}
+          onMarkAllRead={() => {
+            setPatients((prev) => prev.map((p) => p.id === patient.id ? { ...p, messages: (p.messages || []).map((m) => ({ ...m, read: true })) } : p));
+          }}
+          onClear={null}
+        />
+      </div>
+
+      {session && (
+        <SessionOverlay
+          items={included}
+          phase={assessment.phase}
+          images={exerciseImages}
+          onLog={logExercise}
+          onClose={() => setSession(false)}
+        />
       )}
     </div>
   );
 }
 
-/* --------------------------------- امنیت پنل مدیریت --------------------------------- */
-
+/* ===================== امنیت ===================== */
 function AdminGate({ onSubmit, onClose, error }) {
   const [pw, setPw] = useState("");
   const [localErr, setLocalErr] = useState("");
   const [busy, setBusy] = useState(false);
-
   const submit = async () => {
     if (!pw) { setLocalErr("رمز عبور را وارد کنید."); return; }
     setLocalErr(""); setBusy(true);
     await onSubmit(pw);
     setBusy(false);
   };
-
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#16232E85", zIndex: 70, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 380, padding: 26, textAlign: "center", boxShadow: "var(--shadow-lg)" }}>
-        <div style={{ width: 50, height: 50, borderRadius: 14, background: "#7B5C931a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-          <KeyRound size={20} color="var(--plum)" />
-        </div>
-        <div style={{ fontFamily: "Fraunces, serif", fontSize: 19, fontWeight: 700 }}>ورود به پنل مدیریت</div>
-        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 6, lineHeight: 1.8 }}>
-          پنل مدیریت جدا از بخش بیمار و فقط با رمز عبورِ شما در دسترس است.
-        </div>
-        <input
-          type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="رمز عبور"
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-          style={{ ...inputStyle, marginTop: 16, textAlign: "center", letterSpacing: 2 }}
-          autoFocus
-        />
-        {(localErr || error) && <div style={{ color: "var(--coral)", fontSize: 12, marginTop: 8 }}>{localErr || error}</div>}
-        <button onClick={submit} disabled={busy} style={{ marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: "none", background: "var(--plum)", color: "#fff", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
-          {busy ? "در حال بررسی…" : "ورود"}
-        </button>
-        <button onClick={onClose} style={{ all: "unset", cursor: "pointer", marginTop: 12, fontSize: 11.5, color: "var(--muted)", display: "block", marginInline: "auto" }}>انصراف</button>
-        <div style={{ marginTop: 14, fontSize: 10, color: "var(--muted)", lineHeight: 1.7 }}>
-          رمز به‌صورت درهم‌سازی‌شده (SHA-256) بررسی می‌شود؛ برای دادهٔ بالینی واقعاً حساس از یک سامانهٔ احراز هویت اختصاصی استفاده کنید.
-        </div>
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 380, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+        <div className="lock-icon plum"><KeyRound size={20} color="var(--plum)" /></div>
+        <div className="serif" style={{ fontSize: 19 }}>ورود به پنل مدیریت</div>
+        <div className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.8 }}>جدا از بخش بیمار — فقط با رمز شما.</div>
+        <input type="password" className="input" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="رمز عبور"
+          onKeyDown={(e) => e.key === "Enter" && submit()} style={{ marginTop: 16, textAlign: "center", letterSpacing: 2 }} autoFocus autoComplete="current-password" />
+        {(localErr || error) && <div className="danger-text" style={{ fontSize: 12, marginTop: 8 }}>{localErr || error}</div>}
+        <button className="btn btn-plum" style={{ marginTop: 14, width: "100%" }} onClick={submit} disabled={busy}>{busy ? "در حال بررسی…" : "ورود"}</button>
+        <button className="plain-btn muted" style={{ marginTop: 12, fontSize: 11.5 }} onClick={onClose}>انصراف</button>
       </div>
     </div>
   );
@@ -1426,7 +2116,6 @@ function ChangePasswordModal({ onSubmit, onClose }) {
   const [next2, setNext2] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-
   const submit = async () => {
     const check = validatePassword(next);
     if (check) { setErr(check); return; }
@@ -1436,28 +2125,26 @@ function ChangePasswordModal({ onSubmit, onClose }) {
     setBusy(false);
     if (!ok) setErr("رمز فعلی اشتباه است.");
   };
-
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#16232E85", zIndex: 70, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card)", borderRadius: 18, width: "100%", maxWidth: 380, padding: 26, boxShadow: "var(--shadow-lg)" }}>
-        <div style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 700, marginBottom: 14 }}>تغییر رمز پنل مدیریت</div>
-        <div style={{ display: "grid", gap: 10 }}>
-          <input type="password" placeholder="رمز فعلی" value={current} onChange={(e) => setCurrent(e.target.value)} style={inputStyle} />
-          <input type="password" placeholder="رمز جدید (حرف + عدد + نماد)" value={next} onChange={(e) => setNext(e.target.value)} style={inputStyle} />
-          <input type="password" placeholder="تکرار رمز جدید" value={next2} onChange={(e) => setNext2(e.target.value)} style={inputStyle} />
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 380 }} onClick={(e) => e.stopPropagation()}>
+        <div className="serif" style={{ fontSize: 18, marginBottom: 14 }}>تغییر رمز پنل مدیریت</div>
+        <div className="stack">
+          <input type="password" className="input" placeholder="رمز فعلی" value={current} onChange={(e) => setCurrent(e.target.value)} />
+          <input type="password" className="input" placeholder="رمز جدید (حرف + عدد + نماد)" value={next} onChange={(e) => setNext(e.target.value)} />
+          <input type="password" className="input" placeholder="تکرار رمز جدید" value={next2} onChange={(e) => setNext2(e.target.value)} />
         </div>
-        {err && <div style={{ color: "var(--coral)", fontSize: 12, marginTop: 8 }}>{err}</div>}
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <button onClick={submit} disabled={busy} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", background: "var(--plum)", color: "#fff", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>{busy ? "در حال ذخیره…" : "ذخیره"}</button>
-          <button onClick={onClose} style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid var(--line)", background: "#fff", cursor: "pointer", color: "var(--muted)" }}>انصراف</button>
+        {err && <div className="danger-text" style={{ fontSize: 12, marginTop: 8 }}>{err}</div>}
+        <div className="row" style={{ gap: 8, marginTop: 16 }}>
+          <button className="btn btn-plum" style={{ flex: 1 }} onClick={submit} disabled={busy}>{busy ? "در حال ذخیره…" : "ذخیره"}</button>
+          <button className="btn btn-ghost" onClick={onClose}>انصراف</button>
         </div>
       </div>
     </div>
   );
 }
 
-/* --------------------------------- اپ اصلی --------------------------------- */
-
+/* ===================== اپ ===================== */
 function App() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1465,71 +2152,81 @@ function App() {
   const [unlockedId, setUnlockedId] = useState(null);
   const mounted = useRef(false);
   const [resetConfirm, setResetConfirm] = useState(false);
-
   const [exerciseImages, setExerciseImages] = useState({});
   const [regionAdvice, setRegionAdvice] = useState({});
-
+  const [customExercises, setCustomExercises] = useState([]);
   const [adminHash, setAdminHash] = useState(DEFAULT_ADMIN_HASH);
   const [adminMode, setAdminMode] = useState(false);
   const [showAdminGate, setShowAdminGate] = useState(false);
   const [showChangePw, setShowChangePw] = useState(false);
   const [adminError, setAdminError] = useState("");
+  const [theme, setTheme] = useState("light");
+  const [toasts, setToasts] = useState([]);
+  const fileRef = useRef(null);
+
+  const notify = (msg, type = "info") => {
+    const id = uid();
+    setToasts((t) => [...t, { id, msg, type }]);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2800);
+  };
+
+  const allExercises = useMemo(() => [...EXERCISES, ...customExercises], [customExercises]);
 
   useEffect(() => {
     (async () => {
+      try { const res = await window.storage.get("tavanyar-patients-shared-v1", true); setPatients(res ? JSON.parse(res.value) : []); } catch (e) { setPatients([]); }
+      try { const res2 = await window.storage.get("tavanyar-exercise-images-v1", true); setExerciseImages(res2 ? JSON.parse(res2.value) : {}); } catch (e) { setExerciseImages({}); }
+      try { const res3 = await window.storage.get("tavanyar-region-advice-v1", true); setRegionAdvice(res3 ? JSON.parse(res3.value) : {}); } catch (e) { setRegionAdvice({}); }
+      try { const resC = await window.storage.get("tavanyar-custom-exercises-v1", true); setCustomExercises(resC ? JSON.parse(resC.value) : []); } catch (e) { setCustomExercises([]); }
       try {
-        const res = await window.storage.get("tavanyar-patients-shared-v1", true);
-        setPatients(res ? JSON.parse(res.value) : []);
-      } catch (e) { setPatients([]); }
+        const th = await window.storage.get("tavanyar-theme-v1", true);
+        if (th && th.value) setTheme(th.value);
+        else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) setTheme("dark");
+      } catch (e) {}
       try {
-        const res2 = await window.storage.get("tavanyar-exercise-images-v1", true);
-        setExerciseImages(res2 ? JSON.parse(res2.value) : {});
-      } catch (e) { setExerciseImages({}); }
-      try {
-        const res3 = await window.storage.get("tavanyar-region-advice-v1", true);
-        setRegionAdvice(res3 ? JSON.parse(res3.value) : {});
-      } catch (e) { setRegionAdvice({}); }
-      try {
-        const res4 = await window.storage.get("tavanyar-admin-auth-v2", true);
-        setAdminHash(res4 && res4.value ? res4.value : DEFAULT_ADMIN_HASH);
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("resetpw") === "1") {
+          try { await window.storage.delete("tavanyar-admin-auth-v2", true); } catch (e) {}
+          setAdminHash(DEFAULT_ADMIN_HASH);
+        } else {
+          const res4 = await window.storage.get("tavanyar-admin-auth-v2", true);
+          setAdminHash(res4 && res4.value ? res4.value : DEFAULT_ADMIN_HASH);
+        }
       } catch (e) { setAdminHash(DEFAULT_ADMIN_HASH); }
+      try {
+        if (sessionStorage.getItem("tavanyar-admin-session") === "1") setAdminMode(true);
+        const pid = sessionStorage.getItem("tavanyar-patient-session");
+        if (pid) setUnlockedId(pid);
+      } catch (e) {}
       setLoading(false);
       mounted.current = true;
     })();
   }, []);
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (mounted.current) window.storage.set("tavanyar-theme-v1", theme, true);
+  }, [theme]);
+
+  const persist = async (key, value) => {
+    const r = await window.storage.set(key, JSON.stringify(value), true);
+    if (r && r.error === "QuotaExceededError") notify("حافظه پر است — عکس‌های قدیمی را حذف کنید", "warn");
+  };
+
+  useEffect(() => {
     if (!mounted.current) return;
-    const t = setTimeout(async () => {
-      try {
-        await window.storage.set("tavanyar-patients-shared-v1", JSON.stringify(patients), true);
-        setSavedTick(true);
-        setTimeout(() => setSavedTick(false), 1200);
-      } catch (e) { /* ذخیره بعداً دوباره تلاش می‌شود */ }
-    }, 500);
+    const t = setTimeout(async () => { await persist("tavanyar-patients-shared-v1", patients); setSavedTick(true); setTimeout(() => setSavedTick(false), 1200); }, 500);
     return () => clearTimeout(t);
   }, [patients]);
-
-  useEffect(() => {
-    if (!mounted.current) return;
-    const t = setTimeout(async () => {
-      try { await window.storage.set("tavanyar-exercise-images-v1", JSON.stringify(exerciseImages), true); } catch (e) {}
-    }, 400);
-    return () => clearTimeout(t);
-  }, [exerciseImages]);
-
-  useEffect(() => {
-    if (!mounted.current) return;
-    const t = setTimeout(async () => {
-      try { await window.storage.set("tavanyar-region-advice-v1", JSON.stringify(regionAdvice), true); } catch (e) {}
-    }, 400);
-    return () => clearTimeout(t);
-  }, [regionAdvice]);
+  useEffect(() => { if (!mounted.current) return; const t = setTimeout(() => persist("tavanyar-exercise-images-v1", exerciseImages), 400); return () => clearTimeout(t); }, [exerciseImages]);
+  useEffect(() => { if (!mounted.current) return; const t = setTimeout(() => persist("tavanyar-region-advice-v1", regionAdvice), 400); return () => clearTimeout(t); }, [regionAdvice]);
+  useEffect(() => { if (!mounted.current) return; const t = setTimeout(() => persist("tavanyar-custom-exercises-v1", customExercises), 400); return () => clearTimeout(t); }, [customExercises]);
 
   const resetAll = async () => {
     setPatients([]);
     try { await window.storage.set("tavanyar-patients-shared-v1", JSON.stringify([]), true); } catch (e) {}
     setResetConfirm(false);
+    notify("داده‌های بیماران پاک شد");
   };
 
   const unlockedPatient = patients.find((p) => p.id === unlockedId);
@@ -1542,12 +2239,12 @@ function App() {
     });
   };
 
-  const handleAdviceChange = (regionId, text) => {
-    setRegionAdvice((prev) => ({ ...prev, [regionId]: text }));
-  };
-
   const onAdminButtonClick = () => {
-    if (adminMode) { setAdminMode(false); return; }
+    if (adminMode) {
+      setAdminMode(false);
+      try { sessionStorage.removeItem("tavanyar-admin-session"); } catch (e) {}
+      return;
+    }
     setAdminError("");
     setShowAdminGate(true);
   };
@@ -1559,12 +2256,9 @@ function App() {
         setAdminMode(true);
         setShowAdminGate(false);
         setAdminError("");
-      } else {
-        setAdminError("رمز اشتباه است.");
-      }
-    } catch (e) {
-      setAdminError("خطایی رخ داد، دوباره تلاش کنید.");
-    }
+        try { sessionStorage.setItem("tavanyar-admin-session", "1"); } catch (e) {}
+      } else setAdminError("رمز اشتباه است.");
+    } catch (e) { setAdminError("خطایی رخ داد، دوباره تلاش کنید."); }
   };
 
   const submitChangePassword = async (currentPw, nextPw) => {
@@ -1574,125 +2268,119 @@ function App() {
     setAdminHash(newHash);
     try { await window.storage.set("tavanyar-admin-auth-v2", newHash, true); } catch (e) {}
     setShowChangePw(false);
+    notify("رمز تغییر کرد", "ok");
     return true;
   };
 
-  return (
-    <div style={{ minHeight: "100vh", background: "var(--paper)", direction: "rtl", fontFamily: "Inter, sans-serif", color: "var(--ink)", paddingBottom: 60 }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-        :root{
-          --ink:#16232E; --teal:#2C7A7B; --teal-deep:#1F5B5C; --teal-light:#E3F1EF;
-          --paper:#EEF3EF; --card:#FFFFFF;
-          --coral:#D9645A; --sage:#6E9C7D; --amber:#C98A3B; --gold:#DFA53C; --plum:#7B5C93; --plum-deep:#5B4270;
-          --line:#DCE3DE; --muted:#5B6B66;
-          --shadow-sm: 0 1px 2px rgba(22,35,46,.05), 0 2px 8px rgba(22,35,46,.05);
-          --shadow-md: 0 8px 22px rgba(22,35,46,.10), 0 2px 6px rgba(22,35,46,.05);
-          --shadow-lg: 0 20px 50px rgba(22,35,46,.16);
-        }
-        * { box-sizing: border-box; }
-        body { margin: 0; }
-        input[type=range]{ height:4px; border-radius:999px; accent-color: var(--teal); }
-        ::selection{ background: var(--teal); color:#fff; }
-        button{ transition: transform .15s ease, box-shadow .2s ease, opacity .15s ease, background .2s ease, border-color .2s ease; }
-        button:active{ transform: scale(0.97); }
-        /* کارت‌ها به‌صورت خودکار سایه و افکت هاور می‌گیرند */
-        div[style*="var(--card)"][style*="var(--line)"]{
-          box-shadow: var(--shadow-sm);
-          transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
-        }
-        div[style*="var(--card)"][style*="var(--line)"]:hover{
-          box-shadow: var(--shadow-md);
-        }
-        @keyframes fadeInUp{ from{ opacity:0; transform: translateY(8px);} to{ opacity:1; transform: translateY(0);} }
-        @keyframes floatSlow{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
-        @keyframes flamePulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.12);} }
-        .fade-in{ animation: fadeInUp .5s cubic-bezier(.2,.7,.3,1) both; }
-        @media (prefers-reduced-motion: reduce){ *{ animation-duration: .01ms !important; } }
-      `}</style>
+  const exportBackup = () => {
+    const blob = new Blob([JSON.stringify({
+      patients, exerciseImages, regionAdvice, customExercises, adminHash, exportedAt: new Date().toISOString(), v: 3,
+    }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `tavanyar-backup-${todayStr()}.json`;
+    a.click();
+    notify("فایل پشتیبان دانلود شد", "ok");
+  };
 
-      {/* دکمهٔ شناور ورود به پنل مدیریت — کاملاً جدا از تجربهٔ بیمار، در گوشهٔ بالا-چپ صفحه */}
-      <button
-        onClick={onAdminButtonClick}
-        title="پنل مدیریت"
-        style={{
-          all: "unset", cursor: "pointer", position: "fixed", top: 16, left: 16, zIndex: 60,
-          width: 42, height: 42, borderRadius: 13, display: "flex", alignItems: "center", justifyContent: "center",
-          background: adminMode ? "var(--plum)" : "var(--card)", border: `1px solid ${adminMode ? "var(--plum)" : "var(--line)"}`,
-          boxShadow: "var(--shadow-md)",
-        }}
-      >
+  const importBackup = async (file) => {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data || !Array.isArray(data.patients)) throw new Error("bad");
+      setPatients(data.patients);
+      setExerciseImages(data.exerciseImages || {});
+      setRegionAdvice(data.regionAdvice || {});
+      setCustomExercises(data.customExercises || []);
+      notify("پشتیبان بازیابی شد", "ok");
+    } catch (e) { notify("فایل پشتیبان نامعتبر است", "warn"); }
+  };
+
+  const unlockPatient = (id) => {
+    setUnlockedId(id);
+    try { sessionStorage.setItem("tavanyar-patient-session", id); } catch (e) {}
+  };
+  const lockPatient = () => {
+    setUnlockedId(null);
+    try { sessionStorage.removeItem("tavanyar-patient-session"); } catch (e) {}
+  };
+
+  return (
+    <div className="app">
+      <style>{APP_CSS}</style>
+      <Toasts items={toasts} />
+
+      <button className={`fab-admin ${adminMode ? "on" : ""}`} onClick={onAdminButtonClick} title="پنل مدیریت">
         <Stethoscope size={18} color={adminMode ? "#fff" : "var(--plum)"} />
+      </button>
+      <button className="fab-theme" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} title="تم">
+        {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
       </button>
 
       {adminMode ? (
-        <header style={{ position: "sticky", top: 0, zIndex: 20, background: "linear-gradient(135deg, var(--plum), var(--plum-deep))", padding: "12px 16px", boxShadow: "var(--shadow-md)" }}>
-          <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 11, background: "#ffffff22", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Stethoscope size={18} color="#fff" />
-              </div>
+        <header className="hdr hdr-admin">
+          <div className="hdr-inner">
+            <div className="row" style={{ gap: 10 }}>
+              <div className="brand-mark admin"><Stethoscope size={18} color="#fff" /></div>
               <div>
-                <div style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, lineHeight: 1.1, color: "#fff" }}>پنل مدیریت توان‌یار</div>
+                <div className="serif" style={{ fontWeight: 700, fontSize: 17, color: "#fff" }}>پنل مدیریت توان‌یار</div>
                 <div style={{ fontSize: 10.5, color: "#ffffffb0" }}>جدا از تجربهٔ بیمار — فقط برای پزشک/درمانگر</div>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="row wrap" style={{ gap: 8 }}>
               {savedTick && <span style={{ fontSize: 11, color: "#fff" }}>ذخیره شد ✓</span>}
-              <button onClick={() => setShowChangePw(true)} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#fff", background: "#ffffff22", borderRadius: 999, padding: "7px 12px" }}>
-                <KeyRound size={13} /> تغییر رمز
-              </button>
-              <button onClick={() => setAdminMode(false)} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--plum-deep)", background: "#fff", borderRadius: 999, padding: "7px 12px", fontWeight: 700 }}>
-                <LogOut size={13} /> خروج از پنل مدیریت
-              </button>
+              <button className="hdr-chip" onClick={exportBackup}><Download size={13} /> پشتیبان</button>
+              <button className="hdr-chip" onClick={() => fileRef.current && fileRef.current.click()}><Upload size={13} /> بازیابی</button>
+              <input ref={fileRef} type="file" accept="application/json" style={{ display: "none" }} onChange={(e) => e.target.files && e.target.files[0] && importBackup(e.target.files[0])} />
+              <button className="hdr-chip" onClick={() => setShowChangePw(true)}><KeyRound size={13} /> تغییر رمز</button>
+              <button className="hdr-chip light" onClick={onAdminButtonClick}><LogOut size={13} /> خروج</button>
             </div>
           </div>
         </header>
       ) : (
-        <header style={{ position: "sticky", top: 0, zIndex: 20, background: "#EEF3EFEE", backdropFilter: "blur(6px)", borderBottom: "1px solid var(--line)", padding: "12px 16px" }}>
-          <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 11, background: "linear-gradient(135deg, var(--teal), var(--teal-deep))", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" }}>
-                <Sparkles size={18} color="#fff" />
-              </div>
+        <header className="hdr hdr-public">
+          <div className="hdr-inner">
+            <div className="row" style={{ gap: 10 }}>
+              <div className="brand-mark"><Sparkles size={18} color="#fff" /></div>
               <div>
-                <div style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, lineHeight: 1.1 }}>توان‌یار</div>
-                <div style={{ fontSize: 10.5, color: "var(--muted)" }}>دستیار هوشمند تجویز ورزش توانبخشی</div>
+                <div className="serif" style={{ fontWeight: 700, fontSize: 17 }}>توان‌یار</div>
+                <div className="muted" style={{ fontSize: 10.5 }}>دستیار هوشمند تجویز ورزش توانبخشی</div>
               </div>
             </div>
           </div>
         </header>
       )}
 
-      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "10px 16px 0" }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 11.5, color: "var(--muted)" }}>
-          <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-          {adminMode
-            ? "این ابزار صرفاً کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نمی‌شود. پنل مدیریت با رمز عبور محافظت می‌شود؛ دادهٔ بیماران به‌صورت مشترک در فضای ذخیره‌سازی این صفحه نگه‌داری می‌شود."
-            : "این ابزار صرفاً کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نمی‌شود. برنامهٔ ورزشی شما را پزشک از پنل مدیریت تنظیم می‌کند و با یک کد ۴ رقمی قابل مشاهده است؛ این کد یک قفل سادهٔ نمایشی است، نه احراز هویت واقعی."}
-        </div>
+      <div className="disclaimer">
+        <Info size={13} />
+        {adminMode
+          ? "کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نیست. داده در همین مرورگر ذخیره می‌شود."
+          : "کمک‌تصمیم بالینی است و جایگزین قضاوت پزشک نیست. برنامه را پزشک تنظیم می‌کند."}
       </div>
 
-      <div style={{ marginTop: 18, maxWidth: adminMode ? undefined : 1180, marginInline: adminMode ? undefined : "auto" }}>
+      <div style={{ marginTop: 18 }}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 13 }}>در حال بارگذاری…</div>
+          <div className="muted" style={{ textAlign: "center", padding: 60, fontSize: 13 }}>در حال بارگذاری…</div>
         ) : adminMode ? (
-          <div style={{ maxWidth: 1180, margin: "0 auto", padding: "0 16px" }} className="fade-in">
+          <div className="fade-in" style={{ maxWidth: 1180, margin: "0 auto", padding: "0 16px" }}>
             <DoctorConsole
               patients={patients} setPatients={setPatients}
               exerciseImages={exerciseImages} onImageChange={handleImageChange}
-              regionAdvice={regionAdvice} onAdviceChange={handleAdviceChange}
+              regionAdvice={regionAdvice} onAdviceChange={(id, text) => setRegionAdvice((p) => ({ ...p, [id]: text }))}
+              allExercises={allExercises} customExercises={customExercises} setCustomExercises={setCustomExercises}
+              notify={notify}
             />
             <div style={{ textAlign: "center", marginTop: 40 }}>
-              <button onClick={() => (resetConfirm ? resetAll() : setResetConfirm(true))} style={{ all: "unset", cursor: "pointer", fontSize: 11, color: "var(--muted)" }}>
+              <button className="plain-btn muted" style={{ fontSize: 11 }} onClick={() => (resetConfirm ? resetAll() : setResetConfirm(true))}>
                 {resetConfirm ? "برای پاک‌شدن همهٔ دادهٔ بیماران دوباره کلیک کنید" : "پاک کردن همهٔ دادهٔ بیماران"}
               </button>
             </div>
           </div>
         ) : unlockedPatient ? (
-          <PatientPortal patient={unlockedPatient} setPatients={setPatients} onLock={() => setUnlockedId(null)} exerciseImages={exerciseImages} regionAdvice={regionAdvice} />
+          <PatientPortal patient={unlockedPatient} setPatients={setPatients} onLock={lockPatient}
+            exerciseImages={exerciseImages} regionAdvice={regionAdvice} allExercises={allExercises} />
         ) : (
-          <PatientLockScreen patients={patients} onUnlock={setUnlockedId} />
+          <PatientLockScreen patients={patients} onUnlock={unlockPatient} />
         )}
       </div>
 
@@ -1702,6 +2390,233 @@ function App() {
   );
 }
 
+const APP_CSS = `
+  :root{
+    --ink:#1A2A28; --teal:#0F766E; --teal-deep:#115E59; --teal-light:#E3F1EF;
+    --paper:#E8EDE8; --paper-2:#DDE6E0; --card:#FFFffc;
+    --coral:#C45C52; --sage:#5B8F6A; --amber:#B8862A; --gold:#D4A017; --plum:#6B4C7A; --plum-deep:#4E3659;
+    --line:#D3DDD6; --muted:#5C6F6A; --map-idle:#C5D4CC;
+    --shadow-sm: 0 1px 2px rgba(22,35,46,.05), 0 2px 8px rgba(22,35,46,.05);
+    --shadow-md: 0 8px 22px rgba(22,35,46,.10), 0 2px 6px rgba(22,35,46,.05);
+    --shadow-lg: 0 20px 50px rgba(22,35,46,.16);
+  }
+  [data-theme="dark"]{
+    --ink:#E6F0EC; --teal:#2DD4BF; --teal-deep:#5EEAD4; --teal-light:#14302C;
+    --paper:#0C1210; --paper-2:#15201C; --card:#151C1A;
+    --coral:#F07167; --sage:#86C994; --amber:#E0B15A; --gold:#F0C14B; --plum:#C4A3D6; --plum-deep:#2A1C33;
+    --line:#24302C; --muted:#8AA39B; --map-idle:#24302C;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.25); --shadow-md: 0 8px 24px rgba(0,0,0,.35); --shadow-lg: 0 20px 50px rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; }
+  .app{
+    min-height:100vh; background: var(--paper); color: var(--ink);
+    font-family: Vazirmatn, Inter, sans-serif; direction: rtl;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+  .serif{ font-family: Fraunces, Vazirmatn, serif; font-weight: 700; }
+  .num{ font-family: "IBM Plex Mono", Vazirmatn, monospace; }
+  .muted{ color: var(--muted); }
+  .row{ display:flex; align-items:center; }
+  .wrap{ flex-wrap:wrap; }
+  .stack{ display:grid; gap:14px; }
+  .ellipsis{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .card{
+    background: var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow: var(--shadow-sm); transition: box-shadow .25s ease, transform .2s ease;
+  }
+  .card:hover{ box-shadow: var(--shadow-md); }
+  .pad{ padding:18px; } .pad-sm{ padding:12px; }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    padding:10px 14px; border-radius:11px; border:none; font-weight:700; font-size:13.5px;
+    font-family: inherit; cursor:pointer; transition: transform .15s ease, opacity .15s ease, background .2s;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-primary{ background: var(--teal); color:#fff; }
+  .btn-ghost{ background: transparent; color: var(--teal-deep); border:1px solid var(--teal); }
+  .btn-plum{ background: var(--plum); color:#fff; }
+  .btn-danger{ background: var(--coral); color:#fff; }
+  .btn-sm{ padding:7px 12px; font-size:12.5px; border-radius:9px; }
+  .plain-btn{ all:unset; cursor:pointer; }
+  .icon-btn{
+    all:unset; cursor:pointer; width:34px; height:34px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; color: var(--muted); border:1px solid var(--line);
+  }
+  .icon-btn.solid{ background: var(--teal); border-color: var(--teal); }
+  .input{
+    width:100%; margin-top:5px; padding:9px 11px; border-radius:10px; border:1px solid var(--line);
+    font-size:14px; font-family: inherit; background: var(--card); color: var(--ink); box-sizing:border-box;
+  }
+  textarea.input{ resize:vertical; line-height:1.9; }
+  .lbl{ font-size:12.5px; color: var(--muted); }
+  .chip{
+    padding:6px 12px; border-radius:999px; font-size:12.5px; cursor:pointer; font-family:inherit;
+    border:1px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .chip.on{ background: var(--teal); color:#fff; border-color: var(--teal); font-weight:600; }
+  .chip.xs{ padding:4px 8px; font-size:11px; }
+  .search-box{
+    display:flex; align-items:center; gap:6px; background: var(--paper-2); border-radius:10px; padding:6px 10px;
+  }
+  .search-box input{ all:unset; font-size:13px; flex:1; color: var(--ink); }
+  .modal-back{
+    position:fixed; inset:0; background:#16232E85; z-index:70; display:flex; align-items:center; justify-content:center;
+    padding:16px; backdrop-filter: blur(4px);
+  }
+  .modal{
+    background: var(--card); border-radius:18px; width:100%; max-height:88vh; overflow-y:auto; padding:22px;
+    box-shadow: var(--shadow-lg);
+  }
+  .thumb{
+    background: var(--paper-2); border-radius:12px; overflow:hidden; width:52px; height:52px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .thumb.lg{ width:60px; height:60px; border-radius:14px; }
+  .thumb.xs{ width:40px; height:40px; border-radius:10px; }
+  .thumb img, .thumb-img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .thumb-img{ width:64px; height:64px; border-radius:10px; border:1px solid var(--line); }
+  .title-sm{ font-weight:600; font-size:14.5px; }
+  .title-md{ font-weight:700; font-size:16px; display:flex; align-items:center; gap:6px; }
+  .tag-teal{ font-size:11.5px; color: var(--teal-deep); background: color-mix(in srgb, var(--teal) 12%, transparent); border-radius:999px; padding:1px 8px; }
+  .tag-custom{ font-size:10px; background: var(--plum); color:#fff; border-radius:999px; padding:1px 7px; margin-right:6px; }
+  .ok-mini{ color: var(--sage); display:inline-flex; align-items:center; gap:4px; font-size:12.5px; font-weight:600; }
+  .danger-text{ color: var(--coral); }
+  .dose{
+    font-family: "IBM Plex Mono", Vazirmatn, monospace; font-size:12.5px; background: var(--paper-2);
+    padding:4px 9px; border-radius:8px; color: var(--teal-deep); display:inline-block;
+  }
+  .dose-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .dose-cell{ background: var(--paper-2); border-radius:8px; padding:6px 8px; }
+  .ex-details{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); display:grid; gap:8px; font-size:13.5px; }
+  .caution{ display:flex; gap:6px; color: var(--coral); background: color-mix(in srgb, var(--coral) 10%, transparent); border-radius:8px; padding:8px 10px; font-size:12.5px; }
+  .phase-badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; font-weight:600; white-space:nowrap; }
+  .check-box{
+    all:unset; cursor:pointer; width:26px; height:26px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; background: var(--paper-2); border:1px solid var(--line);
+  }
+  .check-box.on{ background: var(--teal); border-color: var(--teal); }
+  .fig-hero{ background: var(--paper-2); padding:28px 0; display:flex; justify-content:center; }
+  .close-abs{ position:absolute; top:10px; left:10px; background:#16232Eaa; border:none; color:#fff; width:30px; height:30px; border-radius:999px; }
+  .empty{ text-align:center; padding:60px 20px; border-style:dashed; }
+  .code-pill{ font-family:"IBM Plex Mono", monospace; font-size:13.5px; letter-spacing:2px; color: var(--teal-deep); background: var(--paper-2); padding:2px 9px; border-radius:7px; font-weight:700; }
+  .linkish{ all:unset; cursor:pointer; font-size:11px; color: var(--muted); text-decoration:underline; display:inline-flex; gap:4px; align-items:center; }
+  .insight{ display:flex; gap:8px; align-items:flex-start; border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.7; }
+  .insight.good{ background: color-mix(in srgb, var(--sage) 14%, transparent); color: var(--sage); }
+  .insight.warn{ background: color-mix(in srgb, var(--coral) 12%, transparent); color: var(--coral); }
+  .heatmap{ display:grid; grid-template-columns: repeat(7, 1fr); gap:4px; max-width:280px; }
+  .heat-cell{ aspect-ratio:1; border-radius:4px; }
+  .timer-box{ margin-top:8px; background: var(--paper-2); border-radius:10px; padding:10px; }
+  .timer-track{ height:6px; background: var(--line); border-radius:99px; overflow:hidden; margin-top:6px; }
+  .timer-fill{ height:100%; background: var(--teal); transition: width .3s linear; }
+  .doc-layout{ display:flex; gap:18px; align-items:flex-start; max-width:1180px; margin:0 auto; padding:0 16px; }
+  .doc-layout.col{ flex-direction:column; gap:12px; padding:0 12px; }
+  .sidebar{ width:260px; flex-shrink:0; position:sticky; top:88px; }
+  .doc-layout.col .sidebar{ width:100%; position:static; }
+  .patient-list{ display:grid; gap:6px; max-height:520px; overflow-y:auto; }
+  .doc-layout.col .patient-list{ max-height:240px; }
+  .patient-item{
+    all:unset; cursor:pointer; display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:11px;
+    border:1px solid transparent;
+  }
+  .patient-item.active{ background: var(--paper-2); border-color: var(--teal); }
+  .avatar{ width:34px; height:34px; border-radius:999px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tabs{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line); overflow-x:auto; }
+  .tab{
+    all:unset; cursor:pointer; display:flex; align-items:center; gap:6px; padding:10px 12px; font-size:13px;
+    color: var(--muted); white-space:nowrap; border-bottom:2px solid transparent; flex-shrink:0;
+  }
+  .tab.on{ font-weight:700; color: var(--teal-deep); border-bottom-color: var(--teal); }
+  .doc-main{ flex:1; min-width:0; }
+  .lib-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap:10px; }
+  .kpi-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap:10px; }
+  .kpi-n{ font-size:28px; margin-top:4px; }
+  .lock-card{
+    max-width:380px; margin:40px auto; text-align:center; background: var(--card); border:1px solid var(--line);
+    border-radius:22px; padding:28px; box-shadow: var(--shadow-md);
+  }
+  .lock-icon{
+    width:52px; height:52px; border-radius:14px; background: var(--paper-2);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
+  }
+  .lock-icon.plum{ background: color-mix(in srgb, var(--plum) 14%, transparent); }
+  .pin-dots{ display:flex; justify-content:center; gap:10px; margin:18px 0 8px; }
+  .pin-dots i{ width:12px; height:12px; border-radius:99px; background: var(--line); display:block; transition: background .15s; }
+  .pin-dots i.on{ background: var(--teal); }
+  .pin-pad{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
+  .pin-key{
+    height:52px; border-radius:14px; border:1px solid var(--line); background: var(--paper-2); color: var(--ink);
+    font-size:18px; font-weight:700; font-family: inherit; cursor:pointer;
+  }
+  .pin-key.go{ background: var(--teal); color:#fff; border-color: var(--teal); font-size:14px; }
+  .portal{ max-width:640px; margin:0 auto; padding:0 16px; }
+  .hero{
+    background: linear-gradient(135deg, var(--teal), var(--teal-deep) 65%, var(--plum-deep));
+    border-radius:20px; padding:22px; color:#fff; margin-bottom:16px; position:relative; overflow:hidden;
+  }
+  .hero-glow{ position:absolute; inset:0; opacity:.5; background: radial-gradient(circle at 88% -10%, #ffffff30, transparent 45%), radial-gradient(circle at 0% 120%, #ffffff22, transparent 40%); }
+  .pill-light{
+    display:inline-flex; align-items:center; gap:5px; background:#ffffff26; border-radius:999px;
+    padding:5px 12px; font-size:12.5px; font-weight:700; color:#fff;
+  }
+  .quote{ text-align:center; color: var(--muted); font-size:13px; margin-bottom:14px; font-style:italic; }
+  .coach-note{ background: var(--teal-light); border:1px solid color-mix(in srgb, var(--teal) 30%, transparent); border-radius:16px; padding:14px; margin-bottom:14px; }
+  .advice-box{ background: var(--teal-light); border:1px solid color-mix(in srgb, var(--teal) 20%, transparent); border-radius:16px; padding:16px; }
+  .clamp2{ overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .session-back{ position:fixed; inset:0; z-index:80; background: linear-gradient(160deg, #0F766E, #115E59 50%, #4E3659); overflow-y:auto; padding:16px 16px 40px; }
+  .session-bar{ display:flex; justify-content:space-between; align-items:center; max-width:520px; margin:0 auto; }
+  .session-track{ height:4px; background:#ffffff33; border-radius:99px; max-width:520px; margin:10px auto 18px; overflow:hidden; }
+  .session-track > div{ height:100%; background:#fff; }
+  .session-body{ max-width:520px; margin:0 auto; }
+  .session-fig{
+    background:#ffffff14; border-radius:20px; min-height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .session-fig img{ width:100%; max-height:260px; object-fit:cover; }
+  .hdr{ position:sticky; top:0; z-index:20; }
+  .hdr-admin{ background: linear-gradient(135deg, var(--plum), var(--plum-deep)); padding:12px 16px; box-shadow: var(--shadow-md); }
+  .hdr-public{ background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); border-bottom:1px solid var(--line); padding:12px 16px; }
+  .hdr-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:11px; background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+    display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow-sm);
+  }
+  .brand-mark.admin{ background:#ffffff22; }
+  .hdr-chip{ all:unset; cursor:pointer; display:flex; align-items:center; gap:5px; font-size:12px; color:#fff; background:#ffffff22; border-radius:999px; padding:7px 12px; }
+  .hdr-chip.light{ background:#fff; color: var(--plum-deep); font-weight:700; }
+  .disclaimer{
+    max-width:1180px; margin:0 auto; padding:10px 16px 0; display:flex; gap:8px; align-items:flex-start;
+    font-size:11.5px; color: var(--muted);
+  }
+  .fab-admin, .fab-theme{
+    all:unset; cursor:pointer; position:fixed; z-index:60; width:42px; height:42px; border-radius:13px;
+    display:flex; align-items:center; justify-content:center; background: var(--card); border:1px solid var(--line);
+    box-shadow: var(--shadow-md);
+  }
+  .fab-admin{ top:16px; left:16px; }
+  .fab-admin.on{ background: var(--plum); border-color: var(--plum); }
+  .fab-theme{ top:16px; left:66px; color: var(--ink); }
+  .toast-wrap{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:100; display:grid; gap:8px; width:min(420px, calc(100% - 24px)); }
+  .toast{ background: var(--ink); color: var(--card); padding:10px 14px; border-radius:12px; font-size:13px; text-align:center; box-shadow: var(--shadow-lg); }
+  .toast-ok{ background: var(--teal-deep); color:#fff; }
+  .toast-warn{ background: var(--coral); color:#fff; }
+  .bodymap-part{ cursor:pointer; transition: fill .15s; }
+  .msg-thread{ display:flex; flex-direction:column; }
+  .msg-bubble{ max-width:78%; padding:9px 12px; border-radius:14px; font-size:13.5px; box-shadow: var(--shadow-sm); }
+  .msg-bubble.mine{ background: var(--teal); color:#fff; border-bottom-right-radius:4px; }
+  .msg-bubble.theirs{ background: var(--card); color: var(--ink); border:1px solid var(--line); border-bottom-left-radius:4px; }
+  .msg-meta{ font-size:10px; opacity:.75; margin-bottom:4px; }
+  .bodymap-part:hover{ filter: brightness(1.08); }
+  .confetti{ pointer-events:none; position:fixed; inset:0; z-index:90; overflow:hidden; }
+  .confetti i{ position:absolute; top:-12px; width:8px; height:14px; border-radius:2px; animation: fall 1.8s linear forwards; opacity:.9; }
+  @keyframes fall{ to{ transform: translateY(110vh) rotate(220deg); opacity:0; } }
+  @keyframes fadeInUp{ from{ opacity:0; transform: translateY(8px);} to{ opacity:1; transform: translateY(0);} }
+  @keyframes flamePulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.12);} }
+  .fade-in{ animation: fadeInUp .45s cubic-bezier(.2,.7,.3,1) both; }
+  input[type=range]{ height:4px; border-radius:999px; accent-color: var(--teal); }
+  ::selection{ background: var(--teal); color:#fff; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration: .01ms !important; } }
+  @media print{ .fab-admin, .fab-theme, .hdr, .disclaimer { display:none !important; } }
+`;
 
 try {
   const rootEl = document.getElementById("root");
@@ -1709,7 +2624,7 @@ try {
   root.render(<App />);
 } catch (err) {
   document.getElementById("root").innerHTML =
-    '<div id="boot-msg">خطا در اجرای برنامه: ' + (err && err.message ? err.message : err) + '</div>';
+    '<div id="boot-msg">خطا در اجرای برنامه: ' + (err && err.message ? err.message : err) + "</div>";
   console.error(err);
 }
 </script>
