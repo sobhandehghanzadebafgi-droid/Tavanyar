@@ -217,51 +217,51 @@ const HOLD_SEC = {
 };
 
 const EXERCISES = [
-  { id: "cv1", name: "چرخش گردن (AROM)", region: "cervical", category: "mobility", startPhase: 1, posture: "bust", motion: "rotate", cues: "سر را آرام به راست و چپ بچرخانید تا جایی‌که درد ایجاد نشود؛ حرکت کنترل‌شده باشد.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "cv2", name: "تیلت جانبی گردن", region: "cervical", category: "mobility", startPhase: 1, posture: "bust", motion: "tilt", cues: "گوش را به‌سمت شانه نزدیک کنید؛ شانه‌ها ثابت بمانند.", ref: "APTA CPG – Neck Pain (JOSPT)" },
+  { id: "cv1", name: "چرخش گردن (AROM)", region: "cervical", category: "mobility", startPhase: 1, posture: "bust", motion: "rotate", gif: "https://sspark.genspark.ai/i/wzdH0tRp3Yxoclsk?width=2560", cues: "سر را آرام به راست و چپ بچرخانید تا جایی‌که درد ایجاد نشود؛ حرکت کنترل‌شده باشد.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "cv2", name: "تیلت جانبی گردن", region: "cervical", category: "mobility", startPhase: 1, posture: "bust", motion: "tilt", gif: "https://sspark.genspark.ai/i/N8cCw8wOrQy3y3nD?width=2560", cues: "گوش را به‌سمت شانه نزدیک کنید؛ شانه‌ها ثابت بمانند.", ref: "APTA CPG – Neck Pain (JOSPT)" },
   { id: "cv3", name: "تقویت ایزومتریک گردن (چهار جهت)", region: "cervical", category: "isometric", startPhase: 1, posture: "bust", motion: "pulse", cues: "دست را روی پیشانی، شقیقه یا پس‌سر بگذارید و بدون حرکت سر، فشار ملایم وارد کنید.", ref: "APTA CPG – Neck Pain (JOSPT)" },
-  { id: "cv4", name: "کشش ذوزنقه فوقانی", region: "cervical", category: "stretch", startPhase: 2, posture: "bust", motion: "tilt", cues: "سر را به یک سمت خم کرده و با دست مخالف کشش ملایم اعمال کنید.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "cv5", name: "تقویت فلکسورهای عمقی گردن", region: "cervical", category: "strength", startPhase: 2, posture: "bust", motion: "tuck", cues: "چانه را مانند ساختن غبغب به عقب بکشید و ۵ ثانیه نگه دارید.", ref: "JOSPT CPG – Neck Pain" },
+  { id: "cv4", name: "کشش ذوزنقه فوقانی", region: "cervical", category: "stretch", startPhase: 2, posture: "bust", motion: "tilt", gif: "https://sspark.genspark.ai/i/N8cCw8wOrQy3y3nD?width=2560", cues: "سر را به یک سمت خم کرده و با دست مخالف کشش ملایم اعمال کنید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "cv5", name: "تقویت فلکسورهای عمقی گردن", region: "cervical", category: "strength", startPhase: 2, posture: "bust", motion: "tuck", gif: "https://sspark.genspark.ai/i/RQUyiOYr8CmampuW?width=2560", cues: "چانه را مانند ساختن غبغب به عقب بکشید و ۵ ثانیه نگه دارید.", ref: "JOSPT CPG – Neck Pain" },
 
-  { id: "sh1", name: "پاندول شانه (Codman)", region: "shoulder", category: "mobility", startPhase: 1, posture: "standing", motion: "armSwing", cues: "با تکیه به جلو، بازو را آزاد رها کرده و دایره‌های کوچک بچرخانید.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "sh2", name: "لغزش دیوار (Wall Slides)", region: "shoulder", category: "mobility", startPhase: 1, posture: "standing", motion: "armRaiseHigh", cues: "پشت دست‌ها را روی دیوار قرار داده و به‌آرامی به سمت بالا لغزش دهید.", ref: "JOSPT CPG – Shoulder Impingement" },
-  { id: "sh3", name: "چرخش خارجی با تراباند", region: "shoulder", category: "strength", startPhase: 2, posture: "standing", motion: "armRotateElbow", cues: "آرنج چسبیده به بدن، کش را به‌سمت بیرون بکشید.", ref: "Kolber – Shoulder Rehabilitation Protocols" },
-  { id: "sh4", name: "پرس‌آپ دیواری (Wall Push-up Plus)", region: "shoulder", category: "strength", startPhase: 2, posture: "standing", motion: "armPress", cues: "دست‌ها روی دیوار؛ در انتهای فشار، کتف را کمی از هم باز کنید.", ref: "JOSPT CPG – Shoulder Impingement" },
-  { id: "sh5", name: "کشش خلفی کپسول شانه (Sleeper Stretch)", region: "shoulder", category: "stretch", startPhase: 2, posture: "sidelying", motion: "forearmRotate", cues: "به پهلو دراز بکشید و ساعد را به‌آرامی به سمت پایین فشار دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "sh6", name: "جمع کردن کتف‌ها", region: "shoulder", category: "isometric", startPhase: 1, posture: "standing", motion: "armPress", cues: "شانه‌ها را پایین نگه دارید و کتف‌ها را به هم نزدیک کنید؛ ۵ ثانیه نگه دارید.", ref: "Sahrmann – Movement Impairment Syndromes" },
+  { id: "sh1", name: "پاندول شانه (Codman)", region: "shoulder", category: "mobility", startPhase: 1, posture: "standing", motion: "armSwing", gif: "https://sspark.genspark.ai/i/3uF844S2XhtUO2K8?width=2560", cues: "با تکیه به جلو، بازو را آزاد رها کرده و دایره‌های کوچک بچرخانید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "sh2", name: "لغزش دیوار (Wall Slides)", region: "shoulder", category: "mobility", startPhase: 1, posture: "standing", motion: "armRaiseHigh", gif: "https://sspark.genspark.ai/i/S9ah6D4eKl1APmKX?width=2560", cues: "پشت دست‌ها را روی دیوار قرار داده و به‌آرامی به سمت بالا لغزش دهید.", ref: "JOSPT CPG – Shoulder Impingement" },
+  { id: "sh3", name: "چرخش خارجی با تراباند", region: "shoulder", category: "strength", startPhase: 2, posture: "standing", motion: "armRotateElbow", gif: "https://sspark.genspark.ai/i/FndAyr6vXG6jkdpd?width=2560", cues: "آرنج چسبیده به بدن، کش را به‌سمت بیرون بکشید.", ref: "Kolber – Shoulder Rehabilitation Protocols" },
+  { id: "sh4", name: "پرس‌آپ دیواری (Wall Push-up Plus)", region: "shoulder", category: "strength", startPhase: 2, posture: "standing", motion: "armPress", gif: "https://sspark.genspark.ai/i/OrhTOCYVle0C5h7p?width=2560", cues: "دست‌ها روی دیوار؛ در انتهای فشار، کتف را کمی از هم باز کنید.", ref: "JOSPT CPG – Shoulder Impingement" },
+  { id: "sh5", name: "کشش خلفی کپسول شانه (Sleeper Stretch)", region: "shoulder", category: "stretch", startPhase: 2, posture: "sidelying", motion: "forearmRotate", gif: "https://sspark.genspark.ai/i/tj6nUegwMyi8v8ze?width=2560", cues: "به پهلو دراز بکشید و ساعد را به‌آرامی به سمت پایین فشار دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "sh6", name: "جمع کردن کتف‌ها", region: "shoulder", category: "isometric", startPhase: 1, posture: "standing", motion: "armPress", gif: "https://sspark.genspark.ai/i/Ona3737i4660A9PY?width=2560", cues: "شانه‌ها را پایین نگه دارید و کتف‌ها را به هم نزدیک کنید؛ ۵ ثانیه نگه دارید.", ref: "Sahrmann – Movement Impairment Syndromes" },
 
-  { id: "lb1", name: "تیلت لگن (Pelvic Tilt)", region: "lumbar", category: "mobility", startPhase: 1, posture: "supine", motion: "pelvicRock", cues: "به پشت دراز بکشید؛ با سفت‌کردن شکم، کمر را به زمین نزدیک کنید.", ref: "McKenzie – Mechanical Diagnosis and Therapy" },
-  { id: "lb2", name: "زانو به سینه", region: "lumbar", category: "stretch", startPhase: 1, posture: "supine", motion: "kneeToChest", cues: "زانو را با دو دست به‌آرامی به سمت سینه بکشید.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "lb3", name: "گربه–شتر (Cat–Camel)", region: "lumbar", category: "mobility", startPhase: 1, posture: "quadruped", motion: "archSpine", cues: "چهاردست‌وپا؛ ستون فقرات را به‌طور متناوب خم و صاف کنید.", ref: "Sahrmann – Movement Impairment Syndromes" },
-  { id: "lb4", name: "پرس‌آپ مکنزی", region: "lumbar", category: "mobility", startPhase: 2, posture: "prone", motion: "pressUp", cues: "به شکم دراز بکشید و با دست‌ها بالاتنه را آرام بالا بیاورید؛ لگن روی زمین بماند.", ref: "McKenzie – Mechanical Diagnosis and Therapy", caution: "در صورت افزایش درد پا یا بی‌حسی، متوقف شود." },
-  { id: "lb5", name: "پل لگن (Bridging)", region: "lumbar", category: "strength", startPhase: 2, posture: "supine", motion: "bridgeLift", cues: "زانوها خم؛ با فشار پاشنه‌ها، لگن را از زمین بلند کنید.", ref: "APTA CPG – Low Back Pain" },
-  { id: "lb6", name: "پرنده–سگ (Bird-Dog)", region: "lumbar", category: "stability", startPhase: 2, posture: "quadruped", motion: "birdDog", cues: "چهاردست‌وپا؛ دست و پای مخالف را هم‌زمان صاف کرده و ثابت نگه دارید.", ref: "APTA CPG – Low Back Pain" },
-  { id: "lb7", name: "کشش همسترینگ خوابیده", region: "lumbar", category: "stretch", startPhase: 2, posture: "supine", legMode: "straight", motion: "legRaiseStraight", cues: "یک پا را صاف بالا بیاورید تا کشش پشت ران حس شود؛ زانو خم نشود.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "lb1", name: "تیلت لگن (Pelvic Tilt)", region: "lumbar", category: "mobility", startPhase: 1, posture: "supine", motion: "pelvicRock", gif: "https://sspark.genspark.ai/i/CYVNLw6Lp46L4FlU?width=2560", cues: "به پشت دراز بکشید؛ با سفت‌کردن شکم، کمر را به زمین نزدیک کنید.", ref: "McKenzie – Mechanical Diagnosis and Therapy" },
+  { id: "lb2", name: "زانو به سینه", region: "lumbar", category: "stretch", startPhase: 1, posture: "supine", motion: "kneeToChest", gif: "https://sspark.genspark.ai/i/neaV45EOsHYuGpmC?width=2560", cues: "زانو را با دو دست به‌آرامی به سمت سینه بکشید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "lb3", name: "گربه–شتر (Cat–Camel)", region: "lumbar", category: "mobility", startPhase: 1, posture: "quadruped", motion: "archSpine", gif: "https://sspark.genspark.ai/i/E38xP4tO4Pk5VtyU?width=2560", cues: "چهاردست‌وپا؛ ستون فقرات را به‌طور متناوب خم و صاف کنید.", ref: "Sahrmann – Movement Impairment Syndromes" },
+  { id: "lb4", name: "پرس‌آپ مکنزی", region: "lumbar", category: "mobility", startPhase: 2, posture: "prone", motion: "pressUp", gif: "https://sspark.genspark.ai/i/Oo95zljvTY1MujzJ?width=2560", cues: "به شکم دراز بکشید و با دست‌ها بالاتنه را آرام بالا بیاورید؛ لگن روی زمین بماند.", ref: "McKenzie – Mechanical Diagnosis and Therapy", caution: "در صورت افزایش درد پا یا بی‌حسی، متوقف شود." },
+  { id: "lb5", name: "پل لگن (Bridging)", region: "lumbar", category: "strength", startPhase: 2, posture: "supine", motion: "bridgeLift", gif: "https://sspark.genspark.ai/i/PANwcg5layyUYEBV?width=2560", cues: "زانوها خم؛ با فشار پاشنه‌ها، لگن را از زمین بلند کنید.", ref: "APTA CPG – Low Back Pain" },
+  { id: "lb6", name: "پرنده–سگ (Bird-Dog)", region: "lumbar", category: "stability", startPhase: 2, posture: "quadruped", motion: "birdDog", gif: "https://sspark.genspark.ai/i/EBzNM4malqObOagZ?width=2560", cues: "چهاردست‌وپا؛ دست و پای مخالف را هم‌زمان صاف کرده و ثابت نگه دارید.", ref: "APTA CPG – Low Back Pain" },
+  { id: "lb7", name: "کشش همسترینگ خوابیده", region: "lumbar", category: "stretch", startPhase: 2, posture: "supine", legMode: "straight", motion: "legRaiseStraight", gif: "https://sspark.genspark.ai/i/ppaa46ahR1isYei9?width=2560", cues: "یک پا را صاف بالا بیاورید تا کشش پشت ران حس شود؛ زانو خم نشود.", ref: "Kisner & Colby – Therapeutic Exercise" },
 
-  { id: "hp1", name: "کلم‌شل (Clamshell)", region: "hip", category: "strength", startPhase: 1, posture: "sidelying", motion: "topKneeOpen", cues: "به پهلو، زانوها خم؛ زانوی بالایی را مثل صدف باز کنید، لگن ثابت بماند.", ref: "Sahrmann – Movement Impairment Syndromes" },
-  { id: "hp2", name: "ابداکشن هیپ ایستاده", region: "hip", category: "strength", startPhase: 2, posture: "standing", motion: "legAbduct", cues: "کنار دیوار بایستید و پا را مستقیم به بیرون بلند کنید.", ref: "JOSPT CPG – Hip" },
-  { id: "hp3", name: "کشش فلکسور هیپ (نیم‌زانو)", region: "hip", category: "stretch", startPhase: 2, posture: "kneeling", motion: "sink", cues: "نیم‌زانو بزنید و با پیش‌بردن لگن، کشش جلوی ران را احساس کنید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "hp1", name: "کلم‌شل (Clamshell)", region: "hip", category: "strength", startPhase: 1, posture: "sidelying", motion: "topKneeOpen", gif: "https://sspark.genspark.ai/i/NR7TlQMpup683dSO?width=2560", cues: "به پهلو، زانوها خم؛ زانوی بالایی را مثل صدف باز کنید، لگن ثابت بماند.", ref: "Sahrmann – Movement Impairment Syndromes" },
+  { id: "hp2", name: "ابداکشن هیپ ایستاده", region: "hip", category: "strength", startPhase: 2, posture: "standing", motion: "legAbduct", gif: "https://sspark.genspark.ai/i/siUzOLnj8g5ldDOX?width=2560", cues: "کنار دیوار بایستید و پا را مستقیم به بیرون بلند کنید.", ref: "JOSPT CPG – Hip" },
+  { id: "hp3", name: "کشش فلکسور هیپ (نیم‌زانو)", region: "hip", category: "stretch", startPhase: 2, posture: "kneeling", motion: "sink", gif: "https://sspark.genspark.ai/i/UZFFymQEdZTXdhc3?width=2560", cues: "نیم‌زانو بزنید و با پیش‌بردن لگن، کشش جلوی ران را احساس کنید.", ref: "Kisner & Colby – Therapeutic Exercise" },
   { id: "hp4", name: "پل تک‌پا", region: "hip", category: "strength", startPhase: 3, posture: "supine", motion: "bridgeLift", cues: "یک پا صاف در هوا؛ با پای دیگر لگن را بالا ببرید.", ref: "JOSPT CPG – Hip" },
   { id: "hp5", name: "انقباض ایزومتریک باسن", region: "hip", category: "isometric", startPhase: 1, posture: "supine", motion: "bridgeLift", cues: "به پشت، عضلات باسن را سفت کنید و ۵ ثانیه نگه دارید بدون بلند کردن زیاد لگن.", ref: "Sahrmann – Movement Impairment Syndromes" },
 
-  { id: "kn1", name: "کوادریسپس ست (Quad Set)", region: "knee", category: "isometric", startPhase: 1, posture: "supine", legMode: "straight", motion: "quadPulse", cues: "زانو صاف؛ عضله جلوی ران را منقبض کرده و پشت زانو را به زمین فشار دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "kn2", name: "لغزش پاشنه (Heel Slides)", region: "knee", category: "mobility", startPhase: 1, posture: "supine", legMode: "bent", motion: "heelSlide", cues: "به پشت دراز بکشید و پاشنه را روی زمین به‌سمت باسن بلغزانید.", ref: "JOSPT CPG – Knee OA" },
-  { id: "kn3", name: "بلند کردن پای صاف (SLR)", region: "knee", category: "strength", startPhase: 2, posture: "supine", legMode: "straight", motion: "legRaiseStraight", cues: "زانو کاملاً صاف؛ پا را تا ارتفاع زانوی مقابل بالا بیاورید.", ref: "JOSPT CPG – Knee OA" },
+  { id: "kn1", name: "کوادریسپس ست (Quad Set)", region: "knee", category: "isometric", startPhase: 1, posture: "supine", legMode: "straight", motion: "quadPulse", gif: "https://sspark.genspark.ai/i/zmDAGLusBDmYWU59?width=2560", cues: "زانو صاف؛ عضله جلوی ران را منقبض کرده و پشت زانو را به زمین فشار دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "kn2", name: "لغزش پاشنه (Heel Slides)", region: "knee", category: "mobility", startPhase: 1, posture: "supine", legMode: "bent", motion: "heelSlide", gif: "https://sspark.genspark.ai/i/2hxOqMqQ10nbkwFV?width=2560", cues: "به پشت دراز بکشید و پاشنه را روی زمین به‌سمت باسن بلغزانید.", ref: "JOSPT CPG – Knee OA" },
+  { id: "kn3", name: "بلند کردن پای صاف (SLR)", region: "knee", category: "strength", startPhase: 2, posture: "supine", legMode: "straight", motion: "legRaiseStraight", gif: "https://sspark.genspark.ai/i/ppaa46ahR1isYei9?width=2560", cues: "زانو کاملاً صاف؛ پا را تا ارتفاع زانوی مقابل بالا بیاورید.", ref: "JOSPT CPG – Knee OA" },
   { id: "kn4", name: "مینی‌اسکات دیواری", region: "knee", category: "strength", startPhase: 2, posture: "standing", motion: "squatBend", cues: "پشت به دیوار؛ زانوها را تا حدود ۴۵ درجه خم کنید.", ref: "Escamilla – Knee Biomechanics in Squatting" },
   { id: "kn5", name: "گام جانبی با کش", region: "knee", category: "stability", startPhase: 3, posture: "standing", motion: "stepSide", cues: "کش دور مچ پا یا زانو؛ گام‌های جانبی کنترل‌شده بردارید.", ref: "JOSPT CPG – Knee" },
-  { id: "kn6", name: "نشستن و برخاستن از صندلی", region: "knee", category: "strength", startPhase: 2, posture: "standing", motion: "squatBend", cues: "از صندلی بدون کمک دست برخیزید و آرام بنشینید؛ زانو از پنجه جلو نزند.", ref: "JOSPT CPG – Knee OA" },
+  { id: "kn6", name: "نشستن و برخاستن از صندلی", region: "knee", category: "strength", startPhase: 2, posture: "standing", motion: "squatBend", gif: "https://sspark.genspark.ai/i/GOfGGpk6ffID6LvS?width=2560", cues: "از صندلی بدون کمک دست برخیزید و آرام بنشینید؛ زانو از پنجه جلو نزند.", ref: "JOSPT CPG – Knee OA" },
 
-  { id: "ak1", name: "پمپاژ مچ پا (Ankle Pumps)", region: "ankle", category: "mobility", startPhase: 1, posture: "supine", legMode: "straight", motion: "footFlex", cues: "نوک پا را به سمت بالا و پایین حرکت دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
+  { id: "ak1", name: "پمپاژ مچ پا (Ankle Pumps)", region: "ankle", category: "mobility", startPhase: 1, posture: "supine", legMode: "straight", motion: "footFlex", gif: "https://sspark.genspark.ai/i/CNfPBLqAN6YB6tCE?width=2560", cues: "نوک پا را به سمت بالا و پایین حرکت دهید.", ref: "Kisner & Colby – Therapeutic Exercise" },
   { id: "ak2", name: "چرخش دایره‌ای مچ", region: "ankle", category: "mobility", startPhase: 1, posture: "supine", legMode: "straight", motion: "footCircle", cues: "مچ پا را به‌آرامی به‌صورت دایره‌ای بچرخانید.", ref: "Kisner & Colby – Therapeutic Exercise" },
-  { id: "ak3", name: "بلند شدن روی پنجه (Heel Raise)", region: "ankle", category: "strength", startPhase: 2, posture: "standing", motion: "heelRaise", cues: "روی هر دو پا بایستید و پاشنه‌ها را از زمین بلند کنید.", ref: "JOSPT CPG – Ankle" },
+  { id: "ak3", name: "بلند شدن روی پنجه (Heel Raise)", region: "ankle", category: "strength", startPhase: 2, posture: "standing", motion: "heelRaise", gif: "https://sspark.genspark.ai/i/nSuKcEfKinO2qQxo?width=2560", cues: "روی هر دو پا بایستید و پاشنه‌ها را از زمین بلند کنید.", ref: "JOSPT CPG – Ankle" },
   { id: "ak4", name: "تعادل تک‌پا", region: "ankle", category: "stability", startPhase: 3, posture: "standing", motion: "balance", cues: "روی یک پا بایستید و تعادل را حفظ کنید؛ در صورت نیاز نزدیک دیوار.", ref: "JOSPT CPG – Ankle" },
-  { id: "ak5", name: "کشش عضله دوقلو روی دیوار", region: "ankle", category: "stretch", startPhase: 2, posture: "standing", motion: "sink", cues: "یک پا عقب، پاشنه روی زمین؛ به دیوار تکیه دهید تا کشش پشت ساق حس شود.", ref: "JOSPT CPG – Ankle" },
+  { id: "ak5", name: "کشش عضله دوقلو روی دیوار", region: "ankle", category: "stretch", startPhase: 2, posture: "standing", motion: "sink", gif: "https://sspark.genspark.ai/i/oFm6uX1mionsiUJt?width=2560", cues: "یک پا عقب، پاشنه روی زمین؛ به دیوار تکیه دهید تا کشش پشت ساق حس شود.", ref: "JOSPT CPG – Ankle" },
 
-  { id: "co1", name: "پلانک اصلاح‌شده (روی زانو)", region: "core", category: "isometric", startPhase: 2, posture: "prone", kneeSupport: true, motion: "holdPulse", cues: "روی ساعد و زانوها؛ بدن را در یک خط راست نگه دارید.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
-  { id: "co2", name: "دد باگ (Dead Bug)", region: "core", category: "stability", startPhase: 2, posture: "supine", legMode: "straight", motion: "deadBug", cues: "به پشت دراز بکشید؛ دست و پای مخالف را هم‌زمان صاف کنید بدون افتادن کمر.", ref: "Sahrmann – Movement Impairment Syndromes" },
-  { id: "co3", name: "پلانک کامل", region: "core", category: "isometric", startPhase: 3, posture: "prone", kneeSupport: false, motion: "holdPulse", cues: "روی ساعد و نوک پا؛ بدن کاملاً صاف و منقبض.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
-  { id: "co4", name: "پیاده‌روی سریع", region: "core", category: "aerobic", startPhase: 1, posture: "standing", motion: "walk", cues: "با سرعت راحت شروع کرده و به‌تدریج زمان و شدت را افزایش دهید.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
-  { id: "co5", name: "پلانک جانبی روی زانو", region: "core", category: "isometric", startPhase: 2, posture: "sidelying", motion: "holdPulse", cues: "روی ساعد و زانوی پایینی؛ بدن را در یک خط از سر تا زانو نگه دارید.", ref: "ACSM Guidelines" },
+  { id: "co1", name: "پلانک اصلاح‌شده (روی زانو)", region: "core", category: "isometric", startPhase: 2, posture: "prone", kneeSupport: true, motion: "holdPulse", gif: "https://sspark.genspark.ai/i/Kr66imrx284t7ejv?width=2560", cues: "روی ساعد و زانوها؛ بدن را در یک خط راست نگه دارید.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
+  { id: "co2", name: "دد باگ (Dead Bug)", region: "core", category: "stability", startPhase: 2, posture: "supine", legMode: "straight", motion: "deadBug", gif: "https://sspark.genspark.ai/i/msiDfAVwLNGdoWHb?width=2560", cues: "به پشت دراز بکشید؛ دست و پای مخالف را هم‌زمان صاف کنید بدون افتادن کمر.", ref: "Sahrmann – Movement Impairment Syndromes" },
+  { id: "co3", name: "پلانک کامل", region: "core", category: "isometric", startPhase: 3, posture: "prone", kneeSupport: false, motion: "holdPulse", gif: "https://sspark.genspark.ai/i/Kr66imrx284t7ejv?width=2560", cues: "روی ساعد و نوک پا؛ بدن کاملاً صاف و منقبض.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
+  { id: "co4", name: "پیاده‌روی سریع", region: "core", category: "aerobic", startPhase: 1, posture: "standing", motion: "walk", gif: "https://sspark.genspark.ai/i/YBySrHkAR6SAJvNB?width=2560", cues: "با سرعت راحت شروع کرده و به‌تدریج زمان و شدت را افزایش دهید.", ref: "ACSM Guidelines for Exercise Testing and Prescription" },
+  { id: "co5", name: "پلانک جانبی روی زانو", region: "core", category: "isometric", startPhase: 2, posture: "sidelying", motion: "holdPulse", gif: "https://sspark.genspark.ai/i/YSHXrKY0034DKwlW?width=2560", cues: "روی ساعد و زانوی پایینی؛ بدن را در یک خط از سر تا زانو نگه دارید.", ref: "ACSM Guidelines" },
 ];
 
 const PHASE_META = {
@@ -839,7 +839,7 @@ function LibraryCard({ ex, image, onImageChange, onDeleteCustom }) {
     <div className="card pad-sm">
       <button className="plain-btn row" style={{ width: "100%", gap: 12 }} onClick={() => setOpen((o) => !o)}>
         <div className="thumb">
-          {image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={52} />}
+          {ex.gif ? <img src={ex.gif} alt={ex.name} /> : image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={52} />}
         </div>
         <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
           <div className="title-sm">{ex.name} {ex.custom && <span className="tag-custom">سفارشی</span>}</div>
@@ -847,7 +847,7 @@ function LibraryCard({ ex, image, onImageChange, onDeleteCustom }) {
             <span className="tag-teal">{region?.label}</span>
             <CategoryTag category={ex.category} />
             <PhaseBadge phase={ex.startPhase} size="sm" />
-            {image && <span className="ok-mini"><Check size={11} /> دارای عکس</span>}
+            {ex.gif && <span className="gif-badge"><Play size={10} /> نمایش متحرک</span>}{image && <span className="ok-mini"><Check size={11} /> دارای عکس</span>}
           </div>
         </div>
         {open ? <ChevronDown size={18} color="var(--muted)" /> : <ChevronRight size={18} color="var(--muted)" />}
@@ -902,7 +902,7 @@ function ProgramRow({ ex, phase, included, onToggle, image }) {
           {included ? <Check size={15} color="#fff" /> : null}
         </button>
         <div className="plain-btn row" style={{ flex: 1, gap: 12, minWidth: 0 }} onClick={() => setOpen((o) => !o)}>
-          <div className="thumb">{image ? <img src={image} alt="" /> : <ExerciseFigure ex={ex} size={48} />}</div>
+          <div className="thumb">{ex.gif ? <img src={ex.gif} alt={ex.name} /> : image ? <img src={image} alt="" /> : <ExerciseFigure ex={ex} size={48} />}</div>
           <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
             <div className="title-sm">{ex.name}</div>
             <div className="row wrap" style={{ gap: 8, marginTop: 3 }}>
@@ -923,7 +923,9 @@ function ExerciseDetailModal({ ex, phase, image, onClose }) {
     <div className="modal-back" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 440, padding: 0, overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ position: "relative" }}>
-          {image ? (
+          {ex.gif ? (
+            <img src={ex.gif} alt={ex.name} style={{ width: "100%", maxHeight: 300, objectFit: "cover", display: "block" }} />
+          ) : image ? (
             <img src={image} alt={ex.name} style={{ width: "100%", maxHeight: 300, objectFit: "cover", display: "block" }} />
           ) : (
             <div className="fig-hero"><ExerciseFigure ex={ex} size={140} /></div>
@@ -950,7 +952,7 @@ function PortalCard({ ex, phase, done, onLog, image }) {
   return (
     <div className="card pad" style={{ borderColor: done ? "var(--sage)" : "var(--line)" }}>
       <button className="plain-btn row" style={{ width: "100%", gap: 14, alignItems: "flex-start" }} onClick={() => setShowDetail(true)}>
-        <div className="thumb lg">{image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={60} />}</div>
+        <div className="thumb lg">{ex.gif ? <img src={ex.gif} alt={ex.name} /> : image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={60} />}</div>
         <div style={{ flex: 1, minWidth: 0, textAlign: "right" }}>
           <div className="title-md">{ex.name} <span className="muted" style={{ fontSize: 11, fontWeight: 500 }}>· مشاهده</span></div>
           <div className="clamp2 muted" style={{ fontSize: 13.5, marginTop: 4 }}>{ex.cues}</div>
@@ -1884,7 +1886,7 @@ function SessionOverlay({ items, phase, images, onLog, onClose }) {
       <div className="session-track"><div style={{ width: `${((idx + (stage === "log" ? 0.5 : 0)) / items.length) * 100}%` }} /></div>
       <div className="session-body fade-in">
         <div className="session-fig">
-          {image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={160} />}
+          {ex.gif ? <img src={ex.gif} alt={ex.name} /> : image ? <img src={image} alt={ex.name} /> : <ExerciseFigure ex={ex} size={160} />}
         </div>
         <div className="serif" style={{ fontSize: 22, color: "#fff", marginTop: 8 }}>{ex.name}</div>
         <div style={{ color: "#ffffffcc", lineHeight: 1.9, marginTop: 8, fontSize: 14.5 }}>{ex.cues}</div>
@@ -2481,6 +2483,7 @@ const APP_CSS = `
   .tag-teal{ font-size:11.5px; color: var(--teal-deep); background: color-mix(in srgb, var(--teal) 12%, transparent); border-radius:999px; padding:1px 8px; }
   .tag-custom{ font-size:10px; background: var(--plum); color:#fff; border-radius:999px; padding:1px 7px; margin-right:6px; }
   .ok-mini{ color: var(--sage); display:inline-flex; align-items:center; gap:4px; font-size:12.5px; font-weight:600; }
+  .gif-badge{ font-size:10.5px; color: var(--teal-deep); background: color-mix(in srgb, var(--teal) 10%, transparent); border-radius:999px; padding:1px 7px; display:inline-flex; align-items:center; gap:3px; }
   .danger-text{ color: var(--coral); }
   .dose{
     font-family: "IBM Plex Mono", Vazirmatn, monospace; font-size:12.5px; background: var(--paper-2);
@@ -2615,6 +2618,27 @@ const APP_CSS = `
   input[type=range]{ height:4px; border-radius:999px; accent-color: var(--teal); }
   ::selection{ background: var(--teal); color:#fff; }
   @media (prefers-reduced-motion: reduce){ *{ animation-duration: .01ms !important; } }
+  /* ==== پاسخ‌گویی موبایل — جلوگیری از سرریز افقی در پنل پزشک ==== */
+  html, body{ overflow-x:hidden; }
+  .app{ overflow-x:hidden; }
+  img, svg{ max-width:100%; }
+  @media (max-width: 900px){
+    .doc-layout{ flex-direction:column !important; gap:12px; padding:0 12px; }
+    .doc-layout .sidebar{ width:100% !important; position:static !important; }
+    .doc-layout .patient-list{ max-height:240px; }
+    .doc-main{ width:100%; min-width:0; }
+    .tabs{ flex-wrap:nowrap; }
+  }
+  @media (max-width: 560px){
+    .kpi-grid{ grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); }
+    .lib-grid{ grid-template-columns:1fr; }
+    .dose-grid{ grid-template-columns:repeat(3,1fr); }
+    .modal{ padding:16px; }
+    .hdr-inner{ gap:8px; }
+    .tab{ padding:8px 9px; font-size:12px; }
+    .hero{ padding:16px; }
+    .session-fig{ min-height:150px; }
+  }
   @media print{ .fab-admin, .fab-theme, .hdr, .disclaimer { display:none !important; } }
 `;
 
