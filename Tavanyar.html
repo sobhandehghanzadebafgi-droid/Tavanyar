@@ -9737,7 +9737,18 @@ function PatientAccessPanel({ record, phases, onUpdateRecord }) {
 
 function PlanStep({ regionId, diseaseId, history, patient, record, onUpdateRecord, onBack, onNew, onPrint }) {
   var reg = DISEASE_MAP[regionId];
-  var dz = reg.diseases.find(function (d) { return d.id === diseaseId; });
+  var dz = reg && reg.diseases.find(function (d) { return d.id === diseaseId; });
+  if (!reg || !dz) {
+    return (
+      <div className="wrap mt16">
+        <div className="card">
+          <div className="sec-title"><span className="bar" />این پرونده قابل نمایش نیست</div>
+          <p className="sec-desc">ناحیه یا بیماری مربوط به این پرونده در نسخهٔ فعلی برنامه پیدا نشد (ممکن است پرونده مربوط به نسخهٔ قدیمی‌تر باشد).</p>
+          <button className="btn btn-p" onClick={onNew}><Plus size={16} /> پروندهٔ جدید</button>
+        </div>
+      </div>
+    );
+  }
   var phaseIdx = record ? (record.activePhase || 0) : 0;
   var phase = (PHASE_DATA[diseaseId] && PHASE_DATA[diseaseId].phases[phaseIdx]) || null;
   var hx = HistoryEffects(history);
@@ -10286,6 +10297,20 @@ function App() {
 
           {step === "region" ? <RegionStep regionId={regionId} onSelect={goRegion} /> : null}
           {step === "disease" && reg ? <DiseaseStep regionId={regionId} diseaseId={diseaseId} onSelect={goDisease} onBack={function () { setStep("region"); }} /> : null}
+          {(step === "disease" || step === "phase" || step === "plan") && !reg ? (
+            <div className="wrap mt16"><div className="card">
+              <div className="sec-title"><span className="bar" />ناحیه پیدا نشد</div>
+              <p className="sec-desc">این پرونده به ناحیه‌ای اشاره می‌کند که در نسخهٔ فعلی برنامه وجود ندارد.</p>
+              <button className="btn btn-p" onClick={newRec}><Plus size={16} /> پروندهٔ جدید</button>
+            </div></div>
+          ) : null}
+          {step === "phase" && reg && !dz ? (
+            <div className="wrap mt16"><div className="card">
+              <div className="sec-title"><span className="bar" />بیماری پیدا نشد</div>
+              <p className="sec-desc">این پرونده به بیماری‌ای اشاره می‌کند که در نسخهٔ فعلی برنامه وجود ندارد یا حذف شده است.</p>
+              <button className="btn btn-o" onClick={function () { setStep("disease"); }}><ChevronRight size={16} /> انتخاب بیماری</button>
+            </div></div>
+          ) : null}
           {step === "phase" && dz ? (
             <PhaseStep
               diseaseId={diseaseId} history={history} onToggleHistory={toggleHistory}
@@ -10293,7 +10318,7 @@ function App() {
               onGenerate={generate} onBack={backFromPhase}
             />
           ) : null}
-          {step === "plan" && dz ? (
+          {step === "plan" ? (
             <PlanStep
               regionId={regionId} diseaseId={diseaseId} history={history} patient={patient}
               record={records.find(function (r) { return r.id === currentId; })}
@@ -10329,7 +10354,60 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null, info: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error: error };
+  }
+  componentDidCatch(error, info) {
+    this.setState({ error: error, info: info });
+    try { console.error("Tavanyar crash:", error, info); } catch (e) {}
+  }
+  handleReset() {
+    this.setState({ error: null, info: null });
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  render() {
+    if (this.state.error) {
+      var msg = (this.state.error && (this.state.error.message || String(this.state.error))) || "خطای نامشخص";
+      var stack = (this.state.error && this.state.error.stack) || "";
+      return (
+        <div dir="rtl" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "Vazirmatn, sans-serif", background: "#F1F5F9" }}>
+          <div style={{ maxWidth: 640, width: "100%", background: "#fff", border: "1px solid #FECACA", borderRadius: 16, padding: 22, boxShadow: "0 8px 24px -12px rgba(15,23,42,.2)" }}>
+            <div style={{ fontWeight: 800, fontSize: 16, color: "#DC2626", marginBottom: 8 }}>یک خطا رخ داد و صفحه بارگذاری نشد</div>
+            <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.8, marginBottom: 12 }}>
+              متأسفانه در نمایش این بخش مشکلی پیش آمد. پیام خطا (لطفاً برای رفع مشکل این متن را ارسال کنید):
+            </div>
+            <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 10, padding: 12, fontSize: 12, fontFamily: "monospace", direction: "ltr", textAlign: "left", color: "#991B1B", whiteSpace: "pre-wrap", wordBreak: "break-word", maxHeight: 220, overflow: "auto" }}>
+              {msg}
+              {stack ? "\n\n" + stack : ""}
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+              <button
+                onClick={() => { try { localStorage.removeItem("tav_plans_v2"); } catch (e) {} window.location.reload(); }}
+                style={{ background: "#DC2626", color: "#fff", border: "none", borderRadius: 999, padding: "9px 16px", fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}
+              >
+                پاک کردن اطلاعات ذخیره‌شده و شروع مجدد
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                style={{ background: "#fff", color: "#334155", border: "1.5px solid #CBD5E1", borderRadius: 999, padding: "9px 16px", fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}
+              >
+                بارگذاری مجدد صفحه
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><App /></ErrorBoundary>);
 </script>
 </body>
 </html>
