@@ -15440,5 +15440,291 @@ ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><App 
   var ov=document.createElement('div');ov.id='pf-ov';ov.innerHTML='<div id="pf-card"></div>';document.body.appendChild(ov);
   var fab=document.createElement('button');fab.id='pf-fab';fab.textContent='🧑‍⚕️ پنل فیزیوتراپیست';fab.onclick=function(){st.tab='patient';st.message='';st.record=null;ov.style.display='flex';render();};document.body.appendChild(fab);
 })();</script>
+
+<script>
+(function(){
+  /* ==========================================================
+     توان‌یار — موتور راهنمای مدالیته فیزیوتراپی
+     Source basis: Cameron, Physical Agents in Rehabilitation, 5e.
+     This layer is decision-support, not autonomous treatment.
+     ========================================================== */
+  try { if (typeof PHASE_DATA !== "undefined") window.PHASE_DATA = PHASE_DATA; } catch(e) {}
+
+  window.TAV_MODALITY_DB = {
+    cryo:{
+      name:"سرمادرمانی (Cryotherapy)",
+      chapter:"Cameron — Chapter 8",
+      goals:["کنترل درد","کنترل التهاب و ادم","کاهش موقت اسپاستیسیتی"],
+      params:"Cold/ice pack معمولاً ۱۰–۲۰ دقیقه برای درد، التهاب یا ادم؛ برای کنترل التهاب اندام‌ها معمولاً ≤۱۵ دقیقه و بین جلسات حداقل ۱ ساعت فاصله. برای اسپاستیسیتی ممکن است تا ۳۰ دقیقه با پایش هر ۱۰–۱۵ دقیقه.",
+      pearls:["در ادم اندام، بالا نگه‌داشتن اندام می‌تواند همراه درمان استفاده شود.","پس از درمان پوست از نظر wheal/rash و پاسخ غیرطبیعی بررسی شود.","پس از رفع التهاب حاد، ادامه سرما ممکن است روند بهبود را کند کند."],
+      cautions:["خطر آسیب سرمایی/یخ‌زدگی","در اختلال حس یا گردش خون با احتیاط ویژه","در پاسخ‌های غیرطبیعی پوستی یا عدم تحمل، درمان متوقف شود"]
+    },
+    heat:{
+      name:"گرمای سطحی (Superficial Thermotherapy)",
+      chapter:"Cameron — Chapter 8",
+      goals:["کاهش درد","افزایش جریان خون","افزایش extensibility بافت نرم","کاهش stiffness"],
+      params:"Hot pack: نمونه بالینی کتاب ۲۰ دقیقه با لایه‌های حوله مناسب. Paraffin: حدود ۴۵–۵۰°C برای کاربرد مستقیم؛ نمونه کتاب ۵۰°C، ۱۰ دقیقه. Fluidotherapy: نمونه ۴۲°C، ۲۰ دقیقه. IR: نمونه ۱۵–۳۰ دقیقه؛ در شرایط subacute حدود ۱۵ دقیقه و chronic تا ۳۰ دقیقه.",
+      pearls:["برای کوتاهی بافت نرم، گرما باید همراه stretching/mobilization باشد؛ گرما به‌تنهایی طول بافت را اصلاح نمی‌کند.","درمان را هنگام بروز علائم سوختگی قطع کنید.","پوست و پاسخ بیمار باید در طول درمان پایش شود."],
+      cautions:["در التهاب حاد و خونریزی/خطر افزایش ادم مناسب نیست.","در اختلال حس یا گردش خون خطر سوختگی بیشتر است.","روی ناحیه‌ای که topical counterirritant استفاده شده گرمای سطحی اعمال نشود.","در demyelinating peripheral nerve مانند CTS/ulnar entrapment، گرما با احتیاط."]
+    },
+    us:{
+      name:"اولتراسوند درمانی (Therapeutic Ultrasound)",
+      chapter:"Cameron — Chapter 9",
+      goals:["گرم‌کردن بافت‌های عمقی","افزایش extensibility","کمک به برخی فرایندهای ترمیم بافت"],
+      params:"تنظیمات باید بر اساس هدف، عمق و بافت انتخاب شوند. کتاب نمونه‌هایی مانند 1 MHz، شدت 1–2 W/cm² و duty cycle حدود 20% برای lateral epicondylitis و 0.89 MHz، 2.5 W/cm² pulsed 1:4 برای calcific tendinitis گزارش می‌کند؛ این اعداد نسخه عمومی برای همه بیماری‌ها نیستند.",
+      pearls:["هد دستگاه باید در طول درمان حرکت کند تا standing wave و خطر سوختگی کاهش یابد.","در استخوان سطحی و گردش/حس مختل شدت را کاهش دهید.","Continuous برای اثر حرارتی و pulsed برای اثرات nonthermal به‌کار می‌رود."],
+      cautions:["روی ناحیه malignancy استفاده نشود.","روی fracture فقط low-dose protocol مورد بحث کتاب؛ high-intensity ممنوع.","روی breast implant، high-dose ultrasound استفاده نشود.","در اختلال حس/گردش خون خطر burn بیشتر است.","از کاربرد ثابت transducer اجتناب شود."]
+    },
+    swd:{
+      name:"دیاترمی (Diathermy / Shortwave)",
+      chapter:"Cameron — Chapter 10",
+      goals:["گرم‌کردن عمقی","کاهش درد و stiffness در موارد منتخب"],
+      params:"پارامترها وابسته به continuous یا pulsed shortwave، applicator و هدف درمان هستند؛ تنظیم عددی باید بر اساس دستگاه و پروتکل همان دستگاه انجام شود.",
+      pearls:["Continuous SWD گرمای عمقی ایجاد می‌کند؛ nonthermal SWT با شدت متوسط پایین‌تر اثر حرارتی عمده ندارد.","برای نواحی وسیع‌تر از برخی روش‌های عمقی دیگر مناسب‌تر است."],
+      cautions:["Metallic implants و implanted electronic devices از نکات مهم ایمنی هستند.","در malignancy و pregnancy بسته به محل/شرایط ممنوعیت یا احتیاط وجود دارد.","پروتکل سازنده دستگاه باید رعایت شود."]
+    },
+    tens:{
+      name:"تحریک الکتریکی برای کنترل درد (TENS)",
+      chapter:"Cameron — Chapter 13",
+      goals:["کاهش درد حاد یا مزمن","تسهیل فعالیت با کنترل علامت"],
+      params:"High-rate TENS: biphasic، pulse duration حدود 50–80 µs، frequency حدود 100–150 pps، شدت تا احساس قوی/راحت بدون contraction. Low-rate: <10 pps و شدت تا contraction قابل مشاهده/لمس؛ معمولاً حداکثر ۲۰–۳۰ دقیقه و سپس فاصله حداقل ۲ ساعت.",
+      pearls:["برای high-rate درمان می‌تواند هنگام درد/انتظار درد ادامه یابد.","Modulation برای کاهش adaptation مفید است اما الزاماً analgesia را بیشتر نمی‌کند.","در درد مزمن، هدف باید کمک به عملکرد باشد نه جایگزینی فعالیت و exercise."],
+      cautions:["الکترود روی نواحی دارای حس مختل نیازمند احتیاط است.","در implanted electronic devices و برخی شرایط قلبی باید contraindication/precaution دستگاه و کتاب بررسی شود.","پوست زیر الکترود از نظر irritation بررسی شود."]
+    },
+    nmes:{
+      name:"تحریک عضلانی (NMES/EMS)",
+      chapter:"Cameron — Chapter 12",
+      goals:["تقویت عضله","muscle reeducation","کنترل اسپاسم در موارد منتخب","کمک به پمپ عضلانی و ادم ناشی از بی‌تحرکی"],
+      params:"Strengthening: 35–80 pps، pulse duration حدود 125–200 µs برای عضلات کوچک و 200–350 µs برای عضلات بزرگ؛ on 6–10 s، off 50–120 s در شروع، ramp حداقل 2 s؛ 10–20 دقیقه برای 10–20 contraction. برای muscle pump: 35–50 pps، 2–5 s on/2–5 s off، 20–30 دقیقه.",
+      pearls:["برای تقویت، شدت باید contraction مؤثر ایجاد کند و بیمار در صورت امکان همزمان voluntary contraction انجام دهد.","در عضلات بزرگ، pulse duration طولانی‌تر معمولاً راحت‌تر است.","Ramp برای راحتی و کاهش تغییر ناگهانی نیرو مفید است."],
+      cautions:["در acute injury که contraction می‌تواند بافت را تحریک کند، استفاده نکنید.","در اختلال حس، پایش ایمنی دشوارتر است.","Denervated muscle پروتکل متفاوتی دارد؛ پارامتر NMES معمولی را به آن تعمیم ندهید."]
+    },
+    hvpc:{
+      name:"تحریک الکتریکی برای ترمیم بافت/ادم (HVPC)",
+      chapter:"Cameron — Chapter 14",
+      goals:["کمک به tissue healing","کنترل ادم ناشی از التهاب","کنترل ادم ناشی از lack of muscle contraction با پروتکل متفاوت"],
+      params:"Tissue healing: frequency حدود 60–125 pps، تحریک مداوم، شدت در حد احساس راحت بدون motor response، معمولاً 45–60 دقیقه در مطالعات مورد اشاره. Edema inflammatory: HVPC، negative polarity، 120 pps، pulse duration حدود 40–100 µs، حدود 90% visual motor threshold، 30 دقیقه.",
+      pearls:["اول علت ادم را مشخص کنید؛ کتاب تأکید می‌کند ادم ناشی از نارسایی سیستمیک را نباید با ES درمان کرد.","برای edema ناشی از بی‌حرکتی، پروتکل muscle-pump جداست.","محل و polarity الکترود باید مستند شود."],
+      cautions:["در systemic edema مانند علل قلبی/کلیوی/کبدی به‌عنوان درمان ادم استفاده نشود.","در implanted electronic devices و شرایط منع ES احتیاط/منع طبق پروتکل ایمنی."]
+    },
+    emg:{
+      name:"بیوفیدبک الکترومیوگرافیک (EMG Biofeedback)",
+      chapter:"Cameron — Chapter 15",
+      goals:["facilitation","inhibition/down-training","coordination و motor control"],
+      params:"پارامتر عددی ثابت مانند ES ندارد؛ الکترودها و threshold بر اساس عضله، هدف و سیگنال EMG تنظیم می‌شوند.",
+      pearls:["برای بیمار باید ارتباط بین فعالیت عضله و بازخورد دستگاه واضح باشد.","می‌تواند برای facilitation عضلات ضعیف یا inhibition عضلات بیش‌فعال استفاده شود."],
+      cautions:["در پوست آسیب‌دیده یا جایی که placement امن نیست استفاده نشود.","اگر بیمار قادر به درک/استفاده از feedback نیست، ارزش بالینی محدود می‌شود."]
+    },
+    laser:{
+      name:"لیزر و نور درمانی (Laser / Light)",
+      chapter:"Cameron — Chapter 16",
+      goals:["کنترل درد","کمک به tissue healing","برخی کاربردهای انتخابی در arthritis/neuropathy/lymphedema"],
+      params:"دوز باید با wavelength، power و energy density (J/cm²) تعیین شود؛ کتاب تأکید می‌کند energy density معیار استاندارد دوز است و نسخه یکسانی برای تمام بیماری‌ها ارائه نمی‌کند.",
+      pearls:["نوع منبع (laser/LED/SLD)، wavelength، power و energy density باید ثبت شوند.","دستورالعمل دستگاه خاص همیشه باید بررسی شود."],
+      cautions:["هرگز مستقیم به چشم تابانده نشود.","روی malignancy ممنوع.","تا ۴–۶ ماه پس از radiotherapy طبق کتاب ممنوع.","در ناحیه hemorrhage و endocrine glands ممنوعیت ذکر شده است.","در pregnancy روی low back/abdomen احتیاط؛ در photosensitizer، impaired sensation و epiphyseal plates احتیاط."]
+    },
+    hydro:{
+      name:"آب‌درمانی (Hydrotherapy)",
+      chapter:"Cameron — Chapter 18",
+      goals:["exercise با کاهش load","ROM و mobility","کمک به circulation","wound cleansing در شرایط مناسب"],
+      params:"دمای آب و مدت درمان باید بر اساس هدف و تحمل بیمار تعیین شود؛ کتاب مثال‌های مختلفی از warm water exercise و wound care دارد و نسخه واحدی برای همه بیماری‌ها نمی‌دهد.",
+      pearls:["Buoyancy می‌تواند load را کاهش دهد و حرکت را برای عضلات ضعیف آسان‌تر کند.","آب گرم می‌تواند همراه exercise برای افزایش flexibility و circulation استفاده شود.","کنترل عفونت و ایمنی محیط استخر ضروری است."],
+      cautions:["در open wound، نوع و روش تماس با آب باید با پروتکل wound care سازگار باشد.","خطر لغزش، maceration و مشکلات cardiorespiratory باید ارزیابی شود.","دمای آب و وضعیت بیمار پایش شود."]
+    },
+    traction:{
+      name:"کشش (Mechanical Traction)",
+      chapter:"Cameron — Chapter 19",
+      goals:["کاهش فشار روی nerve root/joint","کاهش درد در شرایط منتخب","کاهش muscle spasm و stretch بافت نرم"],
+      params:"Lumbar: initial/acute phase حدود 13–20 kg static 5–10 min؛ joint distraction تا 22.5 kg یا 50% body weight، intermittent 15/15، 20–30 min؛ muscle spasm حدود 25% body weight، 5/5، 20–30 min؛ disc/soft tissue حدود 25% body weight، 60/20، 20–30 min. Cervical: کتاب نمونه شروع حدود 4 kg و افزایش تدریجی؛ حداکثر 13–15 kg.",
+      pearls:["نیرو باید بر اساس پاسخ علائم تنظیم شود؛ peripheralization علامت کاهش نیرو/توقف است.","برای cervical traction وضعیت بیمار و نوع halter روی نیرو و ایمنی اثر دارد.","Traction درمان عمومی همه کمردردها نیست؛ اندیکاسیون باید مشخص باشد."],
+      cautions:["در instability، fracture، malignancy و سایر contraindicationهای traction استفاده نشود.","در cervical traction علائم neurologic/vascular جدید یا worsening نیازمند توقف و ارزیابی است.","در صورت peripheralization علائم نیرو کاهش یابد/درمان متوقف شود."]
+    },
+    compression:{
+      name:"فشار خارجی (Compression)",
+      chapter:"Cameron — Chapter 20",
+      goals:["کنترل/کاهش ادم","کمک به venous/lymphatic return","کنترل scar tissue در موارد منتخب"],
+      params:"نوع وسیله و فشار باید بر اساس وضعیت عروقی، بافت و هدف انتخاب شود؛ برای pneumatic compression فشار و inflation/deflation time باید مطابق دستگاه و پروتکل انتخاب شود.",
+      pearls:["قبل از compression علت ادم را مشخص کنید.","Compression می‌تواند با elevation و سایر روش‌های کنترل ادم ترکیب شود.","در scar management، compression garments ممکن است در مراحل طولانی‌تر نیز استفاده شوند."],
+      cautions:["DVT/thrombophlebitis/PE، peripheral artery disease، heart failure، obstructed lymphatic/venous return و برخی شرایط دیگر از contraindicationهای pneumatic compression در کتاب هستند.","در impaired sensation/mentation احتیاط.","پوست و تحمل بیمار پایش شود."]
+    },
+    paraffin:{
+      name:"پارافین (Paraffin)",
+      chapter:"Cameron — Chapter 8",
+      goals:["گرم‌کردن اندام‌های دیستال","کاهش stiffness و افزایش extensibility پیش از stretching"],
+      params:"پارافین برای کاربرد مستقیم حدود 45–50°C؛ نمونه کتاب: 50°C، 10 دقیقه، dip-wrap، 7 dips.",
+      pearls:["برای دست و پا به‌دلیل contour مناسب است.","بهتر است قبل از stretching/ROM استفاده شود.","دمای bath و دستور سازنده رعایت شود."],
+      cautions:["در open wound و مواردی که heat contraindicated است استفاده نشود.","اختلال حس/گردش خون خطر burn را افزایش می‌دهد."]
+    }
+  };
+
+  function tavNorm(x){return String(x||"").toLowerCase().replace(/ي/g,"ی").replace(/ك/g,"ک").replace(/\s+/g," ");}
+  function tavDiseaseData(id){return window.PHASE_DATA&&window.PHASE_DATA[id] ? window.PHASE_DATA[id] : null;}
+  function tavAllDiseases(){
+    var d=window.PHASE_DATA||{}, out=[];
+    Object.keys(d).forEach(function(k){if(d[k]&&d[k].fa) out.push({id:k,data:d[k]});});
+    return out;
+  }
+  function tavFindDiseaseByLabel(label){
+    var n=tavNorm(label), all=tavAllDiseases();
+    for(var i=0;i<all.length;i++){
+      var dn=tavNorm(all[i].data.fa);
+      if(dn===n || dn.indexOf(n)>-1 || n.indexOf(dn)>-1) return all[i];
+    }
+    return null;
+  }
+
+  function tavMapModality(text){
+    var x=tavNorm(text), pairs=[
+      ["cryo",["یخ","سرما","cryotherapy","ice pack","ice massage","cold pack"]],
+      ["heat",["گرما","گرمای مرطوب","hot pack","heat","thermotherapy","fluidotherapy","ir lamp","infrared"]],
+      ["paraffin",["پارافین","paraffin"]],
+      ["us",["اولتراسوند","ultrasound","us ","فونوفورزیس","phonophoresis"]],
+      ["swd",["دیاترمی","shortwave","swd","swt","microwave"]],
+      ["tens",["tens","تحریک الکتریکی برای درد","electrical stimulation","es "]],
+      ["nmes",["nmes","ems","تحریک عضلانی","تقویت با تحریک","motor es","muscle stimulation"]],
+      ["hvpc",["hvpc","تحریک برای ترمیم","ترمیم زخم","tissue healing","ادم با تحریک"]],
+      ["emg",["emg biofeedback","بیوفیدبک"]],
+      ["laser",["لیزر","laser","light therapy","نوردرمانی"]],
+      ["hydro",["آب‌درمانی","hydrotherapy","whirlpool","warm water"]],
+      ["traction",["کشش","traction"]],
+      ["compression",["فشرده","compression","کمپرشن","compression garment"]]
+    ];
+    for(var i=0;i<pairs.length;i++){for(var j=0;j<pairs[i][1].length;j++){if(x.indexOf(tavNorm(pairs[i][1][j]))>-1)return pairs[i][0];}}
+    return null;
+  }
+  function tavPhaseModalities(phase){
+    var ids=[], raw=(phase&&phase.mods)||phase&&phase.modalities||[];
+    (raw||[]).forEach(function(m){
+      var id=tavMapModality(typeof m==="string"?m:(m.n||m.name||""));
+      if(id && ids.indexOf(id)<0) ids.push(id);
+    });
+    /* Generic phase guidance from Cameron when the condition record contains
+       a goal but no explicit named modality. This is deliberately conservative. */
+    var title=tavNorm((phase&&phase.title)||"");
+    var all=(raw||[]).join(" ").toLowerCase();
+    if(ids.length===0){
+      if(/حاد|acute|التهاب|inflammation/.test(title+" "+all)) ids=["cryo"];
+      else if(/بهبود|prolifer|subacute|chronic|مزمن|مزمن/.test(title+" "+all)) ids=["heat"];
+      else if(/عملکرد|functional|مقاوم|strength|تقویت/.test(title+" "+all)) ids=["nmes","emg"];
+    }
+    return ids;
+  }
+  function tavModalCard(id, context){
+    var m=window.TAV_MODALITY_DB[id]; if(!m)return "";
+    var ctx=context||"راهنمای عمومی";
+    return '<div class="tm-mod-card">'+
+      '<div class="tm-mod-head"><div><b>'+escTM(m.name)+'</b><span>'+escTM(m.chapter)+'</span></div><span class="tm-tag">'+escTM(ctx)+'</span></div>'+
+      '<div class="tm-row"><b>هدف:</b> '+escTM(m.goals.join("؛ "))+'</div>'+
+      '<div class="tm-row"><b>تنظیمات/دوز:</b> '+escTM(m.params)+'</div>'+
+      '<div class="tm-row"><b>نکات مهم:</b><ul>'+m.pearls.map(function(x){return '<li>'+escTM(x)+'</li>';}).join("")+'</ul></div>'+
+      '<div class="tm-danger"><b>⛔ احتیاط/ممنوعیت‌های کلیدی:</b><ul>'+m.cautions.map(function(x){return '<li>'+escTM(x)+'</li>';}).join("")+'</ul></div>'+
+      '</div>';
+  }
+  function escTM(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+
+  function tavCurrentRecord(){
+    try{
+      var nid=document.getElementById("pf-nid"), code=document.getElementById("pf-code");
+      if(!nid||!code)return null;
+      var n=String(nid.value||"").replace(/\D/g,""), c=String(code.value||"").trim().toUpperCase();
+      if(!n||!c)return null;
+      var a=JSON.parse(localStorage.getItem("tav_plans_v2")||"[]");
+      return a.filter(function(r){
+        var rn=r.patient&&r.patient.nationalId ? String(r.patient.nationalId):String(r.nationalId||"");
+        return rn===n && String(r.accessCode||"").toUpperCase()===c;
+      }).sort(function(a,b){return (b.ts||0)-(a.ts||0);})[0]||null;
+    }catch(e){return null;}
+  }
+
+  function tavRenderSmartPatient(){
+    var r=tavCurrentRecord();
+    var html='<div class="tm-wrap">';
+    html+='<div class="tm-banner"><b>🧠 راهنمای هوشمند مدالیته بر اساس فاز پزشک</b><span>منبع اصلی تنظیمات: Cameron, Physical Agents in Rehabilitation, 5e</span></div>';
+    if(!r){
+      html+='<div class="tm-empty">ابتدا با «کد ملی + کد اختصاصی توانبخشی» پرونده بیمار را باز کنید؛ سپس این بخش، فاز تعیین‌شده توسط پزشک را مبنا قرار می‌دهد.</div></div>';
+      return html;
+    }
+    var d=tavDiseaseData(r.diseaseId);
+    if(!d){
+      html+='<div class="tm-empty">برای این پرونده داده فاز بیماری در پایگاه فعلی پیدا نشد.</div></div>';return html;
+    }
+    var idx=Number(r.activePhase||0), ph=(d.phases||[])[idx]||(d.phases||[])[0];
+    var ids=tavPhaseModalities(ph);
+    html+='<div class="tm-patient-head"><b>'+escTM(d.fa)+'</b><span>فاز فعال پزشک: '+escTM(ph&&ph.title||"—")+'</span></div>';
+    html+='<div class="tm-rule">منطق نمایش: فقط مدالیته‌هایی که با داده فاز پرونده یا هدف فاز همخوانی دارند در این قسمت برجسته می‌شوند. این بخش جایگزین ارزیابی و قضاوت فیزیوتراپیست نیست.</div>';
+    if((ph&&ph.mods||[]).length) html+='<div class="tm-source"><b>آنچه در نسخه فاز ثبت شده:</b> '+escTM(ph.mods.join("؛ "))+'</div>';
+    if(ids.length) html+='<div class="tm-grid">'+ids.map(function(id){return tavModalCard(id,"پیشنهاد مرتبط با فاز فعال");}).join("")+'</div>';
+    else html+='<div class="tm-empty">برای مدالیته‌های ثبت‌شده این فاز، راهنمای پارامتریک در کتاب/پایگاه فعلی قابل تطبیق خودکار نیست؛ انتخاب دستگاه و تنظیمات باید به‌صورت بالینی انجام شود.</div>';
+    html+='</div>';return html;
+  }
+
+  function tavRenderLibrary(q){
+    var all=tavAllDiseases(), n=tavNorm(q||"");
+    if(n) all=all.filter(function(x){return tavNorm(x.data.fa).indexOf(n)>-1 || tavNorm(x.id).indexOf(n)>-1;});
+    var html='<div class="tm-wrap">';
+    html+='<div class="tm-banner"><b>📚 کتابخانه بیماری‌ها و مدالیته‌ها</b><span>برای بیمار بدون ارجاع پزشک</span></div>';
+    html+='<div class="tm-warning">در این قسمت فیزیوتراپیست می‌تواند بیماری را جستجو کند و برای هر فاز، مدالیته‌های مرتبط و اطلاعات پارامتریک موجود در منبع را ببیند. مواردی که کتاب برایشان عدد مشخصی ارائه نکرده، عمداً به‌صورت «نیازمند انتخاب بالینی/دستگاه» نمایش داده می‌شوند.</div>';
+    html+='<input id="tm-disease-search" class="tm-search" placeholder="جستجوی بیماری..." value="'+escTM(q||"")+'">';
+    html+='<div class="tm-disease-list">'+all.map(function(x){
+      return '<button class="tm-disease" data-id="'+escTM(x.id)+'">'+escTM(x.data.fa)+'</button>';
+    }).join("")+'</div>';
+    html+='</div>';return html;
+  }
+
+  function tavRenderDisease(id){
+    var d=tavDiseaseData(id); if(!d)return "";
+    var html='<div class="tm-wrap"><button class="tm-back" id="tm-back">← بازگشت به بیماری‌ها</button>';
+    html+='<div class="tm-banner"><b>'+escTM(d.fa)+'</b><span>راهنمای مدالیته در سه فاز</span></div>';
+    (d.phases||[]).forEach(function(ph,i){
+      var ids=tavPhaseModalities(ph);
+      html+='<section class="tm-phase"><div class="tm-phase-title"><b>فاز '+escTM(ph.title)+'</b><span>'+(ids.length?ids.length+" مدالیته مرتبط":"بدون تطبیق پارامتریک")+'</span></div>';
+      if((ph.mods||[]).length) html+='<div class="tm-source"><b>ثبت موجود در پایگاه بیماری:</b> '+escTM(ph.mods.join("؛ "))+'</div>';
+      if(ids.length) html+='<div class="tm-grid">'+ids.map(function(id){return tavModalCard(id,"فاز بیماری");}).join("")+'</div>';
+      else html+='<div class="tm-empty">مدالیته فیزیکی قابل تطبیق خودکار ثبت نشده است.</div>';
+      html+='</section>';
+    });
+    html+='</div>';return html;
+  }
+
+  function tavInstall(){
+    if(document.getElementById("tm-smart-btn"))return;
+    var style=document.createElement("style");
+    style.textContent=[
+      ".tm-overlay{position:fixed;inset:0;z-index:100005;background:rgba(15,23,42,.62);display:none;align-items:center;justify-content:center;padding:12px;font-family:inherit}",
+      ".tm-window{background:#F8FAFC;width:min(1180px,100%);height:min(92vh,900px);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 70px rgba(0,0,0,.4)}",
+      ".tm-top{background:#0F766E;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.tm-top b{font-size:15px}.tm-close{margin-inline-start:auto;border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit}",
+      ".tm-tab{border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;padding:7px 13px;cursor:pointer;font-family:inherit}.tm-tab.active{background:#fff;color:#0F766E;font-weight:700}",
+      ".tm-content{overflow:auto;padding:16px}.tm-banner{background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#065F46}.tm-banner span{font-size:11px;color:#047857}.tm-rule,.tm-warning{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;border-radius:10px;padding:9px 12px;font-size:12px;line-height:1.9;margin-bottom:12px}",
+      ".tm-patient-head{background:#0F766E;color:#fff;border-radius:12px;padding:12px 15px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}.tm-patient-head span{font-size:12px;color:#CCFBF1}",
+      ".tm-source{background:#F1F5F9;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.9;margin:8px 0}.tm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}.tm-mod-card{background:#fff;border:1px solid #DCE4EC;border-radius:13px;padding:12px}.tm-mod-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.tm-mod-head b{display:block;color:#0F766E;font-size:14px}.tm-mod-head span{display:block;color:#64748B;font-size:10px;margin-top:3px}.tm-tag{background:#ECFDF5;color:#047857!important;border-radius:999px;padding:4px 7px;white-space:nowrap}.tm-row{font-size:12px;line-height:1.9;margin-top:7px;color:#334155}.tm-row ul,.tm-danger ul{margin:4px 0;padding-right:18px}.tm-danger{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:9px;padding:7px 9px;margin-top:9px;font-size:11px;line-height:1.9}.tm-phase{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:12px;margin-bottom:12px}.tm-phase-title{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;color:#0F172A}.tm-phase-title span{font-size:10px;color:#64748B}.tm-search{width:100%;box-sizing:border-box;border:1px solid #CBD5E1;border-radius:10px;padding:10px;font-family:inherit;margin-bottom:10px}.tm-disease-list{display:flex;flex-wrap:wrap;gap:7px}.tm-disease{border:1px solid #CBD5E1;background:#fff;border-radius:999px;padding:8px 12px;font-family:inherit;cursor:pointer;font-size:12px}.tm-disease:hover{border-color:#0F766E;background:#ECFDF5}.tm-back{border:0;background:#E2E8F0;border-radius:8px;padding:7px 12px;font-family:inherit;cursor:pointer;margin-bottom:10px}.tm-empty{background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:10px;padding:14px;text-align:center;color:#64748B;font-size:12px;line-height:1.9}",
+      "#tm-smart-btn{background:#134E4A!important;color:#fff!important}"
+    ].join("\n");document.head.appendChild(style);
+
+    var ov=document.createElement("div");ov.className="tm-overlay";ov.id="tm-overlay";
+    ov.innerHTML='<div class="tm-window"><div class="tm-top"><b>🧠 دستیار مدالیته توان‌یار</b><button class="tm-tab active" id="tm-t-patient">فاز فعال بیمار</button><button class="tm-tab" id="tm-t-library">کتابخانه بیماری‌ها</button><button class="tm-close" id="tm-close">بستن ✕</button></div><div class="tm-content" id="tm-content"></div></div>';
+    document.body.appendChild(ov);
+    var mode="patient", selected=null, q="";
+    function draw(){
+      var c=document.getElementById("tm-content");
+      c.innerHTML=mode==="patient"?tavRenderSmartPatient():(selected?tavRenderDisease(selected):tavRenderLibrary(q));
+      var qs=document.getElementById("tm-disease-search");if(qs){qs.oninput=function(){q=this.value;draw();var x=document.getElementById("tm-disease-search");if(x){x.focus();x.setSelectionRange(q.length,q.length);}};}
+      Array.prototype.forEach.call(c.querySelectorAll(".tm-disease"),function(b){b.onclick=function(){selected=this.getAttribute("data-id");draw();};});
+      var back=document.getElementById("tm-back");if(back)back.onclick=function(){selected=null;draw();};
+    }
+    document.getElementById("tm-close").onclick=function(){ov.style.display="none";};
+    document.getElementById("tm-t-patient").onclick=function(){mode="patient";selected=null;this.classList.add("active");document.getElementById("tm-t-library").classList.remove("active");draw();};
+    document.getElementById("tm-t-library").onclick=function(){mode="library";selected=null;this.classList.add("active");document.getElementById("tm-t-patient").classList.remove("active");draw();};
+    window.tavOpenModalityAssistant=function(){mode="patient";selected=null;ov.style.display="flex";draw();};
+
+    var observer=new MutationObserver(function(){
+      var head=document.getElementById("pf-head");if(!head||document.getElementById("tm-smart-btn"))return;
+      var b=document.createElement("button");b.id="tm-smart-btn";b.className="pf-tab";b.textContent="🧠 مدالیته هوشمند";b.onclick=window.tavOpenModalityAssistant;head.insertBefore(b,document.getElementById("pf-close"));
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",tavInstall);else tavInstall();
+})();
+</script>
+
 </body>
 </html>
