@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0F766E" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<title>توان‌یار — پلتفرم مدیریت توانبخشی با هدایت پزشک | بر پایه Braddom's PM&R</title>
+<title>توان‌یار — پلتفرم مدیریت توانبخشی با هدایت پزشک | بر پایه Braddom's PM&amp;R و Frontera Essentials of PM&amp;R</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -266,12 +266,21 @@ window.__qrcodeLib = null;
     animation:typeTavanyar 1.8s steps(8,end) .25s forwards, caretBlink .75s step-end infinite;
   }
   .splash-line{width:0;height:2px;background:linear-gradient(90deg,transparent,#5eead4,transparent);margin:18px auto 15px;animation:lineGrow .8s ease 1.9s forwards;}
-  .splash-credit{opacity:0;font-family:system-ui,sans-serif;font-size:clamp(11px,2.5vw,15px);letter-spacing:.18em;text-transform:uppercase;font-weight:500;animation:creditIn .7s ease 2.35s forwards;}
+  .splash-credit{opacity:0;transform:translateY(8px);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:clamp(12px,3.2vw,17px);letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#ccfbf1;text-shadow:0 2px 14px rgba(0,0,0,.35);animation:creditIn .9s ease 2.35s forwards;}
+  #tavanyar-splash .splash-hint{position:absolute;left:0;right:0;bottom:22px;text-align:center;font-family:system-ui,sans-serif;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.55);opacity:0;pointer-events:none;transition:opacity .6s ease;}
+  #tavanyar-splash.skippable{cursor:pointer;}
+  #tavanyar-splash.skippable .splash-hint{opacity:1;}
+  @media (prefers-reduced-motion:reduce){
+    .splash-title{width:auto;animation:none;border-right:0;}
+    .splash-line{width:78%;animation:none;}
+    .splash-credit{opacity:1;transform:none;animation:none;}
+    .splash-glow,.splash-content{animation:none;}
+  }
   @keyframes splashEnter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
   @keyframes typeTavanyar{to{width:8.8em}}
   @keyframes caretBlink{50%{border-color:transparent}}
   @keyframes lineGrow{to{width:78%}}
-  @keyframes creditIn{to{opacity:.78;transform:translateY(0)}}
+  @keyframes creditIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   @keyframes splashPulse{50%{transform:scale(1.12);opacity:.7}}
 
 </style>
@@ -284,6 +293,7 @@ window.__qrcodeLib = null;
     <div class="splash-line"></div>
     <div class="splash-credit">Developed by Dr M. Dehghanzade</div>
   </div>
+  <div class="splash-hint">Tap to continue</div>
 </div>
 <div id="root"><div id="boot-msg">در حال بارگذاری توان‌یار…</div></div>
 <script>
@@ -11781,7 +11791,7 @@ function Header({ mode, docAuthed, onSwitchMode, onLogoutDoctor, onPatients, onN
         <div>
           <h1>توان‌یار</h1>
           <div className="sub">
-            {mode === "patient" ? "پنل بیمار — اجرای برنامه و ثبت بازخورد" : "پلتفرم مدیریت توانبخشی با هدایت پزشک — بر پایهٔ Braddom's PM&amp;R (ویرایش ۷) و Frontera Essentials of PM&amp;R (ویرایش ۴)"}
+            {mode === "patient" ? "پنل بیمار — اجرای برنامه و ثبت بازخورد" : "پلتفرم مدیریت توانبخشی با هدایت پزشک — بر پایهٔ Braddom's PM&R (ویرایش ۷) و Frontera Essentials of PM&R (ویرایش ۴)"}
           </div>
         </div>
         <div className="actions">
@@ -15768,7 +15778,7 @@ function App() {
       )}
 
       <div className="foot no-print">
-        <b>توان‌یار</b> — پلتفرم مدیریت توانبخشی با هدایت پزشک؛ بر پایهٔ Braddom's Physical Medicine &amp; Rehabilitation (ویرایش ۷، ۲۰۲۶).<br />
+        <b>توان‌یار</b> — پلتفرم مدیریت توانبخشی با هدایت پزشک؛ بر پایهٔ <bdi>Braddom's PM&amp;R</bdi> (ویرایش ۷) و <bdi>Frontera Essentials of PM&amp;R</bdi> (ویرایش ۴).<br />
         تصمیم بالینی نهایی همیشه در اختیار پزشک است؛ توان‌یار فقط تصمیم پزشک را ساختارمند می‌کند، نسخه را تولید می‌کند، اجرای بیمار را پایش می‌کند و نتیجه را به پزشک برمی‌گرداند.
         <div className="row" style={{ marginTop: 8 }}>
           <button className="btn btn-o" onClick={openPatientRoute}><User size={14} /> ورود بیمار با کد دسترسی</button>
@@ -15843,12 +15853,31 @@ ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><App 
 </script>
 <script>
   (function(){
-    function hideSplash(){
-      var el=document.getElementById("tavanyar-splash");
-      if(el) setTimeout(function(){el.classList.add("hide");}, 2000);
+    /* Splash: به‌جای تایمر ثابت ۲ ثانیه‌ای، تا کامل‌شدن انیمیشن (عنوان + نام توسعه‌دهنده) و آماده‌شدن برنامه صبر می‌کند */
+    var el=document.getElementById("tavanyar-splash");
+    if(!el) return;
+    var t0=Date.now();
+    var MIN_MS=5600;      /* حداقل نمایش: عنوان ≈۲٫۱ث، نام توسعه‌دهنده ≈۳٫۳ث، سپس حدود ۲ ثانیه ماندگاری */
+    var MAX_MS=20000;     /* سقف ایمنی اگر بارگذاری برنامه طولانی شد */
+    var SKIP_MS=3600;     /* پس از نمایش کامل نام توسعه‌دهنده، با لمس می‌توان رد کرد */
+    var done=false;
+    function appReady(){
+      var r=document.getElementById("root");
+      return !!(r && r.children.length && !document.getElementById("boot-msg"));
     }
-    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", hideSplash);
-    else hideSplash();
+    function hide(){
+      if(done) return; done=true;
+      el.classList.add("hide");
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 900);
+    }
+    function tick(){
+      if(done) return;
+      var dt=Date.now()-t0;
+      if(dt>=SKIP_MS) el.classList.add("skippable");
+      if((dt>=MIN_MS && appReady()) || dt>=MAX_MS) hide(); else setTimeout(tick,150);
+    }
+    el.addEventListener("click", function(){ if(Date.now()-t0>=SKIP_MS && appReady()) hide(); });
+    tick();
   })();
 </script>
 
