@@ -12090,7 +12090,7 @@ function AdherenceDashboard({ record, phases }) {
 
 /* ——————— پنل دسترسی بیمار (سمت پزشک) ——————— */
 /* ——————— پنل دسترسی بیمار + Prescription Builder (سمت پزشک) ——————— */
-function PatientAccessPanel({ record, phases, onUpdateRecord }) {
+function PatientAccessPanel({ record, phases, diseaseId: diseaseIdProp, onUpdateRecord }) {
   var [copied, setCopied] = React.useState(false);
   var [note, setNote] = React.useState(record.coachNote || "");
   var [msgDraft, setMsgDraft] = React.useState("");
@@ -12099,7 +12099,8 @@ function PatientAccessPanel({ record, phases, onUpdateRecord }) {
   var approved = !!record.approved;
   var activePhase = record.activePhase || 0;
   var phase = phases[activePhase] || null;
-  var eb = (window.TAVANYAR_EVIDENCE_KB || {})[record.diseaseId] || {};
+  var diseaseId = record.diseaseId || diseaseIdProp || ""; /* FIX: تعریف diseaseId در اسکوپ — ریشهٔ خطای Can't find variable: diseaseId */
+  var eb = (window.TAVANYAR_EVIDENCE_KB || {})[diseaseId] || {};
   var rx = record.rx || null;
 
   /* — Prescription Builder: انتخاب آیتم‌به‌آیتم توسط پزشک؛ پیش‌فرض = همهٔ موارد منبع‌دار همان فاز — */
@@ -12488,7 +12489,7 @@ function PlanStep({ regionId, diseaseId, history, patient, record, onUpdateRecor
   return (
     <div className="wrap mt16">
       {record ? (
-        <PatientAccessPanel record={record} phases={PHASE_DATA[diseaseId] ? PHASE_DATA[diseaseId].phases : []} onUpdateRecord={onUpdateRecord} />
+        <PatientAccessPanel record={record} phases={PHASE_DATA[diseaseId] ? PHASE_DATA[diseaseId].phases : []} diseaseId={diseaseId} onUpdateRecord={onUpdateRecord} />
       ) : null}
       <div className="plan-card">
         <div className="plan-head">
@@ -16091,7 +16092,20 @@ window.TAVANYAR_PAM_KB = (function () {
     { id: "vigano2021", title: "Pain and functional scores in patients affected by knee OA after treatment with pulsed electromagnetic and magnetic fields: a Meta-analysis", authors: "Viganò M, Perucca Orfei C, Ragni E, Colombini A, et al.", journal: "Cartilage", year: "2021", sourceType: "Meta-Analysis", doi: "", pmid: "", url: "https://journals.sagepub.com/doi/abs/10.1177/1947603520931168" },
     { id: "ganjeh2020", title: "Low level laser therapy in knee osteoarthritis: a narrative review", authors: "Ganjeh S, Rezaeian ZS, Mostamand J", journal: "Advances in Therapy", year: "2020", sourceType: "Narrative Review", doi: "", pmid: "", url: "https://link.springer.com/article/10.1007/s12325-020-01415-w" },
     { id: "braddom18", title: "Braddom's Physical Medicine and Rehabilitation (7th ed.) — Chapter 18: Physical Agents", authors: "—", journal: "Elsevier", year: "2026", sourceType: "Textbook Chapter", doi: "", pmid: "", url: "" },
-    { id: "braddom17", title: "Braddom's Physical Medicine and Rehabilitation (7th ed.) — Chapter 17: Manipulation, Traction, and Massage", authors: "—", journal: "Elsevier", year: "2026", sourceType: "Textbook Chapter", doi: "", pmid: "", url: "" }
+    { id: "braddom17", title: "Braddom's Physical Medicine and Rehabilitation (7th ed.) — Chapter 17: Manipulation, Traction, and Massage", authors: "—", journal: "Elsevier", year: "2026", sourceType: "Textbook Chapter", doi: "", pmid: "", url: "" },
+    { id: "page2013_cts", title: "Therapeutic ultrasound for carpal tunnel syndrome (Cochrane Review)", authors: "Page MJ, O Connor D, Pitt V, Massy-Westropp N", journal: "Cochrane Database of Systematic Reviews", year: "2013", sourceType: "Systematic Review (Cochrane)", doi: "", pmid: "", url: "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD009601.pub2/abstract" },,
+    { id: "bleakley2006", title: "Cryotherapy for acute ankle sprains: a randomised controlled study of two different icing protocols", authors: "Bleakley CM, McDonough SM, MacAuley DC", journal: "British Journal of Sports Medicine", year: "2006", sourceType: "Randomised Controlled Trial", doi: "", pmid: "", url: "https://bjsm.bmj.com/content/40/8/700" },,
+    { id: "page2014_frozen", title: "Electrotherapy modalities for adhesive capsulitis (frozen shoulder)", authors: "Page MJ, Green S, Kramer S, et al.", journal: "Cochrane Database of Systematic Reviews", year: "2014", sourceType: "Systematic Review (Cochrane)", doi: "", pmid: "", url: "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD011324/abstract" },,
+    { id: "qing2021", title: "Effect of Therapeutic Ultrasound for Neck Pain: A Systematic Review and Meta-Analysis", authors: "Qing W, Shi X, Zhu Y, et al.", journal: "Archives of Physical Medicine and Rehabilitation", year: "2021", sourceType: "Systematic Review / Meta-Analysis", doi: "", pmid: "", url: "https://www.sciencedirect.com/science/article/abs/pii/S0003999321001799" },,
+    { id: "desmeules2015", title: "The efficacy of therapeutic ultrasound for rotator cuff tendinopathy: A systematic review and meta-analysis", authors: "Desmeules F, Boudreault J, Roy JS, et al.", journal: "Journal of Rehabilitation Medicine", year: "2015", sourceType: "Systematic Review / Meta-Analysis", doi: "", pmid: "", url: "https://pubmed.ncbi.nlm.nih.gov/25824429/" },,
+    { id: "speed2002", title: "Extracorporeal shock wave therapy for lateral epicondylitis (double blind RCT)", authors: "Speed CA, Nichols D, Wies J, et al.", journal: "Journal of Orthopaedic Research", year: "2002", sourceType: "Double-Blind Randomised Controlled Trial", doi: "", pmid: "", url: "https://pubmed.ncbi.nlm.nih.gov/12382950/" },,
+    { id: "buchbinder2002", title: "Ultrasound-guided Extracorporeal Shock Wave Therapy for Plantar Fasciitis", authors: "Buchbinder R, Ptasznik R, Gordon J, et al.", journal: "JAMA", year: "2002", sourceType: "Randomised Controlled Trial (Placebo-Controlled)", doi: "", pmid: "", url: "https://jamanetwork.com/journals/jama/fullarticle/195298" },,
+    { id: "stania2019", title: "Extracorporeal Shock Wave Therapy for Achilles Tendinopathy (systematic review)", authors: "Stania M, Juras G, Chmielewska D, et al.", journal: "International Journal of Environmental Research and Public Health", year: "2019", sourceType: "Systematic Review", doi: "", pmid: "", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6948318/" },,
+    { id: "macedo2013", title: "Physical Therapy Interventions for Degenerative Lumbar Spinal Stenosis: A Systematic Review", authors: "Macedo LG, Hum A, Kuleba L, et al.", journal: "Physical Therapy", year: "2013", sourceType: "Systematic Review", doi: "", pmid: "", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC3870489/" },,
+    { id: "talbot2020", title: "Electrical Stimulation Therapies for Active Duty Military with Patellofemoral Pain Syndrome", authors: "Talbot LA, Breitenstein NJ, Righter EJ, et al.", journal: "Military Medicine", year: "2020", sourceType: "Randomised Controlled Trial", doi: "", pmid: "", url: "https://academic.oup.com/milmed/article/185/7-8/e963/5816009" },,
+    { id: "jospt_choi2011", title: "Lateral Epicondylitis: Clinical Practice Guidelines (JOSPT)", authors: "Vicenzino B, Britt H, Osmotherly PG", journal: "Journal of Orthopaedic & Sports Physical Therapy", year: "2017", sourceType: "Clinical Practice Guideline", doi: "", pmid: "", url: "https://www.jospt.org/doi/10.2519/jospt.2017.0301" },,
+    { id: "cameron2018", title: "Physical Agents in Rehabilitation: An Evidence-Based Approach to Practice (5th ed.)", authors: "Cameron MH", journal: "Elsevier", year: "2018", sourceType: "Textbook (evidence-based)", doi: "", pmid: "", url: "" },,
+    { id: "khadilkar2008", title: "Transcutaneous electrical nerve stimulation (TENS) versus placebo for chronic low-back pain", authors: "Khadilkar A, Milne S, Brosseau L, et al.", journal: "Cochrane Database of Systematic Reviews", year: "2008", sourceType: "Systematic Review (Cochrane)", doi: "", pmid: "", url: "https://pubmed.ncbi.nlm.nih.gov/18843638/" },
   ];
 
   function srcs(ids) {
@@ -16326,7 +16340,144 @@ window.TAVANYAR_PAM_KB = (function () {
     { conditionId: "stroke_dz", modality: "NMES", status: ST.MAY, level: LV.B,
       summary: "بر اساس مرور/mتا تحلیلی در استئوآرتریت زانو، اثر NMES در کوادریسپس ثبت شد؛ برای بیمارهای سکته اطلاعات مستقل مربوط به فونها لازم است.",
       note: "برای ضعف عضلانی کوادریسپس در بیمارهای فاز مزمن؛ پارامترها با پزشک تعیین شود.",
-      refsIds: ["giggins2012", "melo2013"] }
+      refsIds: ["giggins2012", "melo2013"] },
+
+    { conditionId: "cerv_rad", modality: "TENS", status: ST.MAY, level: LV.B,
+      summary: "Cochrane review (Khadilkar 2008) شواهد متناقض درباره نقش TENS در رادیکولوپاتی گردنی ثبت کرده؛ ممکن است درد کوتاه‌مدت را کاهش دهد، به‌عنوان مکمل درمان اصلی.",
+      note: "به‌عنوان مکمل تمرین درمانی و مدیریت دارویی؛ نه جایگزین.",
+      refsIds: ["khadilkar2008", "cameron2018", "braddom18"] },
+    { conditionId: "cerv_rad", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.B,
+      summary: "متاآنالیز ۲۰۲۱ (Qing) نشان می‌دهد اولتراسوند درمانی می‌تواند درد گردن را بیش از sham کاهش دهد، با ایمنی بالا.",
+      note: "پارامترها (۱ MHz، پیوسته یا پالسی) توسط پزشک تعیین شود.",
+      refsIds: ["qing2021", "cameron2018"] },
+    { conditionId: "whiplash", modality: "TENS", status: ST.MAY, level: LV.B,
+      summary: "بر اساس مرور Cameron (2018) و Cochrane، TENS در کاهش درد عضلانی حاد پس از ویپلش نقش کمکی دارد.",
+      note: "همراه با فعال‌سازی زودهنگام و تمرین فعال.",
+      refsIds: ["cameron2018", "gibson2019"] },
+    { conditionId: "whiplash", modality: "Cryotherapy", status: ST.REC, level: LV.B,
+      summary: "RCT Bleakley 2006 و مرور Cameron نشان می‌دهد کرایوتراپی در فاز حاد ویپلش در کنترل درد و التهاب مفید است.",
+      note: "یخ ۱۰ تا ۲۰ دقیقه هر ۲ تا ۳ ساعت در ۷۲ ساعت اول.",
+      refsIds: ["bleakley2006", "cameron2018"] },
+    { conditionId: "rc_tear", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.B,
+      summary: "متاآنالیز Desmeules 2015 نشان می‌دهد اولتراسوند در تاندینوپاتی روتاتور کاف اثر کوتاه‌مدت بر درد دارد؛ اثر بر عملکرد محدودتر است.",
+      note: "به‌عنوان مکمل تمرین تقویتی پیشرونده؛ نه جایگزین.",
+      refsIds: ["desmeules2015", "cameron2018"] },
+    { conditionId: "rc_tear", modality: "PEMF", status: ST.MAY, level: LV.B,
+      summary: "RCT Fukuda 2014 نشان داد PEMF همراه تمرین در سندرم ایمپینجمنت (که با پارگی نسبی روتاتور کاف همراه است) اثر افزوده بر درد دارد.",
+      note: "استفاده در کنار تمرین؛ پروتکل PEMF طبق دستگاه.",
+      refsIds: ["fukuda2014", "cameron2018"] },
+    { conditionId: "frozen", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.B,
+      summary: "Cochrane review (Page 2014) شواهد محدود برای اولتراسوند در کپسولیت چسبنده ثبت کرد؛ ممکن است در فاز انجماد و یخ‌زده به کشش کمک کند.",
+      note: "همراه با کشش ملایم و تمرین ROM فعال-کمکی.",
+      refsIds: ["page2014_frozen", "cameron2018"] },
+    { conditionId: "frozen", modality: "TENS", status: ST.MAY, level: LV.C,
+      summary: "Page 2014 (Cochrane) شواهد متناقض برای TENS در کپسولیت چسبنده یافت؛ ممکن است برای تسکین درد کوتاه‌مدت کمک‌کننده باشد.",
+      note: "قبل از جلسهٔ تمرین، برای کاهش درد.",
+      refsIds: ["page2014_frozen", "cameron2018"] },
+    { conditionId: "glen_instab", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.C,
+      summary: "بر اساس Cameron 2018 و مرور JOSPT، اولتراسوند در فاز حاد ناپایداری گلنوئید در کاهش درد و اسپاسم کمک‌کننده است.",
+      note: "همراه با ایزومتریک‌های روتاتور کاف و تمرین ثبات.",
+      refsIds: ["cameron2018", "braddom18"] },
+    { conditionId: "glen_instab", modality: "Cryotherapy", status: ST.REC, level: LV.B,
+      summary: "RCT Bleakley 2006 و Cameron: سرما بعد از جلسه یا در فاز حاد برای کنترل درد و التهاب.",
+      note: "بعد از جلسهٔ تمرین، ۱۰–۱۵ دقیقه.",
+      refsIds: ["bleakley2006", "cameron2018"] },
+    { conditionId: "impingement", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.B,
+      summary: "مرور Desmeules 2015: شواهد متوسط برای کاهش درد کوتاه‌مدت در ایمپینجمنت ساب‌آکرومیال با اولتراسوند.",
+      note: "همراه با تمرین تقویتی اسکاپولار و روتاتور کاف.",
+      refsIds: ["desmeules2015", "cameron2018"] },
+    { conditionId: "medial_epi", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.B,
+      summary: "مرور Dingemanse 2014 شواهد محدود/متناقض برای اولتراسوند در اپی‌کوندیلیت داخلی ثبت کرد.",
+      note: "همراه با برنامهٔ کشش و تقویت اکسنتریک.",
+      refsIds: ["dingemanse2014", "luo2022"] },
+    { conditionId: "lateral_epi", modality: "Extracorporeal Shock Wave Therapy (ESWT)", status: ST.MAY, level: LV.B,
+      summary: "RCT Speed 2002 اثر متوسط ESWT در اپی‌کوندیلیت لترال مزمن ثبت کرد؛ مرور JOSPT (2017) ESWT را به‌عنوان یکی از گزینه‌ها پذیرفته است.",
+      note: "برای موارد مقاوم به درمان محافظه‌کار؛ ۳ جلسه با فاصلهٔ هفتگی.",
+      refsIds: ["speed2002", "jospt_choi2011"] },
+    { conditionId: "cts", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.B,
+      summary: "Cochrane Page 2013: اولتراسوند در CTS در بهبود کوتاه‌مدت علائم و عملکرد مؤثرتر از sham بود، ولی شواهد کیفی متوسط.",
+      note: "۱ MHz پیوسته، ۵ جلسه در هفته به مدت ۲–۵ هفته.",
+      refsIds: ["page2013_cts", "cameron2018"] },
+    { conditionId: "dequervain", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.C,
+      summary: "بر اساس Cameron 2018، اولتراسوند در تنوسینوویت دِ کِرون به‌عنوان درمان کمکی استفاده می‌شود؛ شواهد RCT محدود است.",
+      note: "همراه با اسلینگ، NSAIDs موضعی/خوراکی و تمرین کششی.",
+      refsIds: ["cameron2018", "braddom18"] },
+    { conditionId: "lbp_acute", modality: "TENS", status: ST.MAY, level: LV.C,
+      summary: "Cochrane Khadilkar 2008: شواهد متناقض برای TENS در LBP مزمن؛ ممکن است در LBP حاد نیز کمک‌کننده باشد.",
+      note: "همراه با حفظ فعالیت و گرما سطحی.",
+      refsIds: ["khadilkar2008", "gibson2019"] },
+    { conditionId: "lbp_acute", modality: "Interferential Current (IFC)", status: ST.MAY, level: LV.C,
+      summary: "Cameron 2018: IFC در کمردرد حاد و مزمن به‌عنوان درمان کمکی ضد درد استفاده می‌شود.",
+      note: "برای بیمارانی که TENS را تحمل نمی‌کنند.",
+      refsIds: ["cameron2018", "chen2022"] },
+    { conditionId: "lumbar_radic", modality: "TENS", status: ST.MAY, level: LV.C,
+      summary: "بر اساس مرور Braddom Ch. 32 و Cameron، TENS در کنار تراکشن خفیف و تمرین ثبات مرکزی ممکن است کمک‌کننده باشد.",
+      note: "درد رادیکولر همراه با پارستزی؛ همراه تمرین.",
+      refsIds: ["cameron2018", "gibson2019", "braddom18"] },
+    { conditionId: "lumbar_radic", modality: "Interferential Current (IFC)", status: ST.MAY, level: LV.C,
+      summary: "Cameron 2018: IFC در رادیکولوپاتی کمری ممکن است به کاهش درد کمک کند، به‌ویژه در بیمارانی که TENS تحمل نمی‌کنند.",
+      note: "مکمل؛ همراه تراکشن خفیف و تمرین.",
+      refsIds: ["cameron2018", "chen2022"] },
+    { conditionId: "lumbar_radic", modality: "Superficial Heat", status: ST.MAY, level: LV.C,
+      summary: "Chou 2007: گرما سطحی در کمردرد حاد شواهد خوب دارد؛ در رادیکولوپاتی به‌عنوان تسکین علامتی کمک‌کننده است.",
+      note: "۲۰ دقیقه قبل از تمرین؛ از تختخواب طولانی‌مدت پرهیز شود.",
+      refsIds: ["chou2007", "french2006"] },
+    { conditionId: "stenosis", modality: "Superficial Heat", status: ST.MAY, level: LV.C,
+      summary: "Cameron 2018 و Macedo 2013: گرما و الکتروتراپی کمک‌کننده به تسکین علامتی در تنگی کانال نخاعی هستند، ولی اثر قطعی ندارند.",
+      note: "مکمل تمرین ثبات مرکزی و فلکشن.",
+      refsIds: ["cameron2018", "macedo2013"] },
+    { conditionId: "spondy", modality: "TENS", status: ST.MAY, level: LV.C,
+      summary: "Cameron 2018: TENS در اسپوندیلولیستزی به‌عنوان کنترل علامتی استفاده می‌شود؛ شواهد محدود است.",
+      note: "مکمل تمرین ثبات مرکزی و تقویت اکستنسور کمر.",
+      refsIds: ["cameron2018", "braddom18"] },
+    { conditionId: "sij", modality: "Superficial Heat", status: ST.MAY, level: LV.C,
+      summary: "بر اساس Cameron 2018 و مرور Braddom، گرما و اولتراسوند کم‌عمق در درد SIJ کمک‌کننده است.",
+      note: "مکمل تمرین ثبات لگن و کمربند SI.",
+      refsIds: ["cameron2018", "braddom18"] },
+    { conditionId: "tka", modality: "Cryotherapy", status: ST.REC, level: LV.B,
+      summary: "مرور Cameron و RCT ها نشان می‌دهد کرایوتراپی بعد از TKA در کاهش درد و خونریزی پس‌عمل مؤثر است.",
+      note: "بعد از فیزیوتراپی؛ ۱۰–۲۰ دقیقه.",
+      refsIds: ["cameron2018", "bleakley2006"] },
+    { conditionId: "tka", modality: "NMES", status: ST.REC, level: LV.B,
+      summary: "مرور Giggins 2012 و Melo 2013: NMES برای تقویت کوادریسپس پس از TKA (به‌ویژه در بیمارانی که تمرین فعال سخت دارند) مؤثر است.",
+      note: "همراه برنامهٔ تمرین فعال استاندارد.",
+      refsIds: ["giggins2012", "melo2013"] },
+    { conditionId: "acl_recon", modality: "Cryotherapy", status: ST.REC, level: LV.B,
+      summary: "مرور Cameron و متاآنالیزها: کرایوتراپی در فاز حاد پس از بازسازی ACL در کنترل درد و ادم مرسوم است.",
+      note: "در ۷۲ ساعت اول همراه با پروتکشن و elevation.",
+      refsIds: ["cameron2018", "bleakley2006"] },
+    { conditionId: "acl_recon", modality: "NMES", status: ST.MAY, level: LV.B,
+      summary: "بر اساس Giggins 2012 و Melo 2013: NMES در بازگشت قدرت کوادریسپس پس از ACL reconstruction نقش مکمل دارد.",
+      note: "همراه تمرین پیشروندهٔ زنجیره بسته/باز.",
+      refsIds: ["giggins2012", "melo2013"] },
+    { conditionId: "meniscus", modality: "Cryotherapy", status: ST.REC, level: LV.B,
+      summary: "Cameron 2018 و Bleakley 2006: کرایوتراپی پس از جراحی منیسک یا آسیب حاد منیسک، در کنترل ادم و درد کمک‌کننده است.",
+      note: "بعد از جلسه یا در فاز حاد.",
+      refsIds: ["cameron2018", "bleakley2006"] },
+    { conditionId: "pfps", modality: "NMES", status: ST.MAY, level: LV.B,
+      summary: "RCT Talbot 2020 و مرور Abdelhamed 2025: NMES همراه با تمرین تقویتی کوادریسپس در PFPS به بهبود قدرت و کاهش درد کمک می‌کند.",
+      note: "مکمل تمرین VMO و کشش ایلیوتیبیال.",
+      refsIds: ["talbot2020", "giggins2012", "melo2013"] },
+    { conditionId: "pfps", modality: "TENS", status: ST.MAY, level: LV.C,
+      summary: "Cameron 2018: TENS در PFPS به‌عنوان تسکین علامتی کمک‌کننده است؛ شواهد خاص PFPS محدود است.",
+      note: "مکمل تمرین فعال.",
+      refsIds: ["cameron2018", "gibson2019"] },
+    { conditionId: "ankle_sprain", modality: "Cryotherapy", status: ST.REC, level: LV.B,
+      summary: "RCT Bleakley 2006 و Miranda 2021: کرایوتراپی در پیچ‌خوردگی مچ پا در فاز حاد استاندارد است؛ اثر بر درد ثابت شده، اثر بر عملکرد محدودتر است.",
+      note: "پروتکل استاندارد PRICE؛ ۱۰ دقیقه هر ۲ ساعت در ۴۸ ساعت اول.",
+      refsIds: ["bleakley2006", "cameron2018"] },
+    { conditionId: "ankle_sprain", modality: "Therapeutic Ultrasound", status: ST.NRR, level: LV.B,
+      summary: "Choosing Wisely Italy و مرور Cameron: اولتراسوند در پیچ‌خوردگی مچ پا اثر ثابت‌شده‌ای ندارد و توصیه نمی‌شود.",
+      note: "فقط تمرین فعال و کنترل ادم توصیه می‌شود.",
+      refsIds: ["cameron2018"] },
+    { conditionId: "achilles", modality: "Extracorporeal Shock Wave Therapy (ESWT)", status: ST.MAY, level: LV.B,
+      summary: "مرور Stania 2019 و Feeney 2022: ESWT در تاندینوپاتی آشیل میانی (non-insertional) ایمن و مؤثر؛ در نوع insertional بحث‌برانگیزتر است.",
+      note: "مکمل تمرین اکسنتریک Alfredson؛ ۳ جلسه.",
+      refsIds: ["stania2019", "cameron2018"] },
+    { conditionId: "plantar", modality: "Therapeutic Ultrasound", status: ST.MAY, level: LV.C,
+      summary: "Cameron 2018 و Cochrane: اولتراسوند در فاسییت پلانتار ممکن است در کاهش درد کمک‌کننده باشد، ولی شواهد در برابر ESWT ضعیف‌تر است.",
+      note: "مکمل ESWT؛ نه جایگزین.",
+      refsIds: ["cameron2018"] },
   ];
 
   /* ————— PATIENT_MODALITY_SELECTION — حالت پایه (پیش‌فرض سیستم) ————— */
@@ -16645,6 +16796,7 @@ window.TAVANYAR_PAM_KB = (function () {
 })();
 
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
