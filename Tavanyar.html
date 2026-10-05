@@ -49,6 +49,30 @@ window.__qrcodeLib = null;
   .chip-btn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:999px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
   .chip-btn:hover{background:rgba(255,255,255,.24);}
   .chip-btn.solid{background:#fff;color:var(--brand-d);border-color:#fff;}
+  /* ===== PAM modality dropdown (Add Modality) ===== */
+  .pam-select{
+    width:100%;
+    max-width:460px;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line2);
+    font-family:inherit;
+    font-size:13.5px;
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .pam-select:hover{border-color:var(--brand);}
+  .pam-select:focus{
+    border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(15,118,110,.15);
+  }
+  .pam-select option:disabled{
+    color:#94A3B8;
+    font-style:italic;
+  }
 
   /* ===== Stepper ===== */
   .steps{display:flex;gap:6px;overflow-x:auto;padding:12px 4px 6px;scrollbar-width:thin;}
@@ -12112,6 +12136,7 @@ function PatientAccessPanel({ record, phases, diseaseId: diseaseIdProp, onUpdate
   var [pamSel, setPamSel] = React.useState([]);
   var [pamView, setPamView] = React.useState(null);
   var [pamSrcView, setPamSrcView] = React.useState(null);
+  var [pamPickerValue, setPamPickerValue] = React.useState("");
   React.useEffect(function () {
     var pnl = [];
     (window.TAVANYAR_PAM_KB ? window.TAVANYAR_PAM_KB.conditionsForAll(record.diseaseId || diseaseId) : []).forEach(function (c) {
@@ -12352,17 +12377,28 @@ function PatientAccessPanel({ record, phases, diseaseId: diseaseIdProp, onUpdate
             <div className="sec-title"><span className="bar" style={{ background: "var(--brand)" }} />Physical Agent Modalities — بخش مستقل (جدا از برنامهٔ تمرینی)</div>
             <p className="sec-desc" style={{ fontSize: 12 }}>این بخش مستقل از Exercise Therapy است. هر modality از بانک مستقل TAVANYAR_PAM_KB انتخاب می‌شود؛ Remove فقط از Treatment Plan همین بیمار حذف می‌کند و Knowledge Base دست نمی‌خورد. نام علمی modalityها انگلیسی باقی می‌ماند.</p>
             {pamSel.length ? pamSel.map(function (p, i) { return <PAMCard key={i} p={p} />; }) : <div className="muted" style={{ fontSize: 12 }}>modality از بانک PAM برای این بیماری ثبت نشده یا پزشک حذف کرده است.</div>}
-            <div className="grp-label" style={{ marginTop: 10 }}><Waves size={14} /> + Add Modality</div>
-            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+            <div className="grp-label" style={{ marginTop: 10 }}><Waves size={14} /> افزودن مدالیته از بانک PAM</div>
+            <select
+              className="pam-select"
+              value={pamPickerValue}
+              onChange={function (e) {
+                var name = e.target.value;
+                setPamPickerValue("");
+                if (name) { pamAdd(name); }
+              }}
+            >
+              <option value="">— یک مدالیته را برای افزودن انتخاب کنید —</option>
               {(window.TAVANYAR_PAM_KB ? window.TAVANYAR_PAM_KB.modalities : []).map(function (m, i) {
                 var already = pamSel.filter(function (p) { return p.modality === m.name; }).length > 0;
                 return (
-                  <button key={i} disabled={already} title={already ? "قبلاً اضافه شده" : ""} onClick={function () { pamAdd(m.name); }}
-                    className={"chip-btn" + (already ? " on" : "")} style={{ fontSize: 11.5 }}>
-                    <bdi>{m.name}</bdi>{already ? " ✓" : " +"}
-                  </button>
+                  <option key={i} value={m.name} disabled={already}>
+                    {m.name}{already ? "   ✓ (قبلاً اضافه شده)" : ""}
+                  </option>
                 );
               })}
+            </select>
+            <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>
+              انتخاب هر مورد، آن مدالیته را به برنامهٔ همین بیمار اضافه می‌کند. بانک دانش (PAM-KB) دست‌نخورده می‌ماند.
             </div>
           </div>
 
